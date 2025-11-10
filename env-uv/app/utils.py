@@ -30,7 +30,7 @@ def simple_match(table, categorie, match):
         set2_col_aob,
         set3_col_aob,
         grind_col_aob,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_aob:
         st.markdown(
             f'<p style="margin:0; color:cyan">{match.upper()}</p>',
@@ -96,7 +96,7 @@ def simple_match(table, categorie, match):
         set2_col_opponent,
         set3_col_opponent,
         grind_col_opponent,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_opponent:
         pass
         st.caption("EXT")
@@ -171,7 +171,7 @@ def double_match(table, categorie, match):
         set2_col_aob1,
         set3_col_aob1,
         grind_col_aob1,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_aob1:
         st.markdown(
             f'<p style="margin:0; color:cyan">{match.upper()}</p>',
@@ -240,7 +240,7 @@ def double_match(table, categorie, match):
         set2_col_aob2,
         set3_col_aob2,
         grind_col_aob2,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_aob2:
         pass
         # st.caption("EXT")
@@ -316,7 +316,7 @@ def double_match(table, categorie, match):
         set2_col_opponent1,
         set3_col_opponent1,
         grind_col_opponent1,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_opponent1:
         st.caption("EXT")
 
@@ -386,7 +386,7 @@ def double_match(table, categorie, match):
         set2_col_opponent2,
         set3_col_opponent2,
         grind_col_opponent2,
-    ) = st.columns([1, 3, 2, 1, 1, 1, 1, 1], gap="small")
+    ) = st.columns([1, 3, 1.5, 1, 1, 1, 1, 1], gap="small")
     with title_col_opponent2:
         pass
         # st.caption("EXT")
