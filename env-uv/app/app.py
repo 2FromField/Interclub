@@ -143,7 +143,7 @@ with st.form("match_record"):
     st.divider()
 
     if categorie != "H2":  # interclub MIXTE
-        left_col, sep, right_col = st.columns([3, 0.4, 3])
+        left_col, sep, right_col = st.columns([3, 0.1, 3])
         with sep:
             pass
 
