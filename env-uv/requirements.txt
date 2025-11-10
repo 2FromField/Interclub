@@ -2,3 +2,4 @@ streamlit>=1.51.0
 pandas>=2.3.3
 gspread>=6.2.1
 google-auth>=2.43.0
+gspread-dataframe>=3.3.1
