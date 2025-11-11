@@ -1,5 +1,10 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+from streamlit_extras.stylable_container import stylable_container
+import gspread
+from google.oauth2.service_account import Credentials
+import datetime as dt
 
 # Données brutes
 CLASSEMENTS = [
@@ -17,6 +22,58 @@ CLASSEMENTS = [
     "N2",
     "N1",
 ]
+
+# --- Accès aux google sheets
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+
+@st.cache_resource
+def _gspread_client():
+    creds = Credentials.from_service_account_info(st.secrets["gcp"], scopes=SCOPES)
+    return gspread.authorize(creds)
+
+
+def _ws(sheet_id: str, worksheet: str):
+    """Récupère une worksheet par nom, crée si absente."""
+    gc = _gspread_client()
+    sh = gc.open_by_key(sheet_id)
+    try:
+        return sh.worksheet(worksheet)
+    except gspread.WorksheetNotFound:
+        return sh.add_worksheet(title=worksheet, rows=1000, cols=26)
+
+
+def read_sheet(worksheet="Feuille1") -> pd.DataFrame:
+    ws = _ws(st.secrets["SHEET_ID"], worksheet)
+    rows = ws.get_all_records()  # suppose la 1re ligne = en-têtes
+    return pd.DataFrame(rows)
+
+
+def to_native(v):
+    # NaN/NaT -> ""
+    if (
+        v is None
+        or (isinstance(v, float) and pd.isna(v))
+        or (isinstance(v, str) and v == "nan")
+    ):
+        return ""
+    if isinstance(v, (pd.Timestamp, dt.datetime, dt.date)):
+        return v.isoformat()
+    if isinstance(v, np.generic):  # numpy.int64, float64, bool_...
+        return v.item()
+    return v
+
+
+def append_row_sheet(row: dict, worksheet="Feuille1"):
+    ws = _ws(st.secrets["SHEET_ID"], worksheet)
+    headers = ws.row_values(1)
+    if not headers:
+        headers = list(row.keys())
+        ws.update("A1", [headers])
+
+    # -> convertit chaque valeur en type natif
+    values = [to_native(row.get(h, "")) for h in headers]
+    ws.append_row(values, value_input_option="USER_ENTERED")
 
 
 # Match de simple (SH,SD)
@@ -420,6 +477,236 @@ def double_match(table, categorie, match):
         )
 
 
+# Récupérer l'ID d'un joueur
 def get_player_id(table, name):
     m = table["name"] == name
     return int(table.loc[m, "id_player"].iloc[0]) if m.any() else None
+
+
+loose_box = """
+        {
+        border: 2px solid red;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: rgba(22,163,74,.06);
+        margin: 6px 0 12px 0;
+        display: flex;
+        align-items: stretch;
+        }
+        """
+win_box = """
+        {
+        border: 2px solid green;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: rgba(22,163,74,.06);
+        margin: 6px 0 12px 0;
+        display: flex;
+        align-items: stretch;
+        }
+        """
+draw_box = """
+        {
+        border: 2px solid whitesmoke;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: rgba(22,163,74,.06);
+        margin: 6px 0 12px 0;
+        display: flex;
+        align-items: stretch;
+        }
+        """
+
+
+# Gestionnaire des colonnes latérales d'affichage des noms de joueurs
+def match_name_histo(name, rank, side, opacity):
+    st.markdown(
+        f"<span style='font-size:1.3rem;opacity:{opacity};float:{side}'>{name} ({rank})</span>",
+        unsafe_allow_html=True,
+    )
+
+
+# Gestionnaire de la colonne centrale d'affichage des sets du match
+def match_score_histo(set1, set2, set3=None):
+    if set3 is not None:
+        c1, c2, c3 = st.columns(3, gap="small")
+        with c1:
+            st.markdown(
+                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
+                unsafe_allow_html=True,
+            )
+        with c2:
+            st.markdown(
+                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
+                unsafe_allow_html=True,
+            )
+        with c3:
+            st.markdown(
+                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set3.replace('/','-')}</div>",
+                unsafe_allow_html=True,
+            )
+    else:
+        c1, c2 = st.columns(2, gap="small")
+        with c1:
+            st.markdown(
+                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
+                unsafe_allow_html=True,
+            )
+        with c2:
+            st.markdown(
+                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
+                unsafe_allow_html=True,
+            )
+
+
+# Configuration de l'opacité des noms en fonction de la victoire/défaite
+def opacity_check(side, set1, set2, set3):
+    if side == "aob":
+        if int(set1.split("/")[0]) > int(set1.split("/")[1]) and int(
+            set2.split("/")[0]
+        ) > int(set2.split("/")[1]):
+            return 1
+        elif (
+            int(set1.split("/")[0]) < int(set1.split("/")[1])
+            and int(set2.split("/")[0]) > int(set2.split("/")[1])
+            and int(set3.split("/")[0]) > int(set3.split("/")[1])
+        ):
+            return 1
+        elif (
+            int(set1.split("/")[0]) > int(set1.split("/")[1])
+            and int(set2.split("/")[0]) < int(set2.split("/")[1])
+            and int(set3.split("/")[0]) > int(set3.split("/")[1])
+        ):
+            return 1
+        else:
+            return 0.6
+    else:
+        if int(set1.split("/")[0]) < int(set1.split("/")[1]) and int(
+            set2.split("/")[0]
+        ) < int(set2.split("/")[1]):
+            return 1
+        elif (
+            int(set1.split("/")[0]) < int(set1.split("/")[1])
+            and int(set2.split("/")[0]) > int(set2.split("/")[1])
+            and int(set3.split("/")[0]) < int(set3.split("/")[1])
+        ):
+            return 1
+        elif (
+            int(set1.split("/")[0]) > int(set1.split("/")[1])
+            and int(set2.split("/")[0]) < int(set2.split("/")[1])
+            and int(set3.split("/")[0]) < int(set3.split("/")[1])
+        ):
+            return 1
+        else:
+            return 0.6
+
+
+# Match remporté par AOB
+def box_color_histo(
+    key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
+):
+    with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
+        # Ligne principale
+        c1, c2, c3, c4 = st.columns(4, gap="small")
+        with c1:
+            st.markdown(
+                f"<span style='font-size:1.3rem;opacity:1;float:left'>{aob_team}</span>",
+                unsafe_allow_html=True,
+            )
+        with c2:
+            st.markdown(
+                f"<span style='font-size:1.3rem;opacity:1;float:right'>{aob_score}</span>",
+                unsafe_allow_html=True,
+            )
+        with c3:
+            st.markdown(
+                f"<span style='font-size:1.3rem;opacity:.6;float:left'>{opponent_score}</span>",
+                unsafe_allow_html=True,
+            )
+        with c4:
+            st.markdown(
+                f"<span style='font-size:1.3rem;opacity:.6;float:right'>{opponent_team}</span>",
+                unsafe_allow_html=True,
+            )
+
+        # Toggle détails (à droite)
+        _left, _sp, _right = st.columns([6, 1, 1])
+        with _left:
+            show = st.toggle(
+                "Afficher les détails", key=f"details_{key_id}", value=False
+            )
+
+        # Détails : s'affichent seulement si activé (slide button)
+        if show:
+            TABLE_MATCHS = read_sheet("TABLE_MATCHS")
+            TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
+            df_filtered = TABLE_MATCHS[(TABLE_MATCHS["id"] == key_id)].reset_index(
+                drop=True
+            )
+            #
+            for k in range(len(df_filtered)):
+                r1c1, r1c2, r1c3 = st.columns([4, 2, 4], gap="small")
+                with r1c1:
+                    # Joueurs de l'AOB
+                    if "/" in str(df_filtered["aob_player_id"].loc[k]):
+                        p1_id = df_filtered["aob_player_id"].loc[k].split("/")[0]
+                        p2_id = df_filtered["aob_player_id"].loc[k].split("/")[1]
+                        #
+                        p1_name = (
+                            TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p1_id)]
+                            .reset_index(drop=True)["name"]
+                            .loc[0]
+                        )
+                        p2_name = (
+                            TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p2_id)]
+                            .reset_index(drop=True)["name"]
+                            .loc[0]
+                        )
+                        match_name_histo(
+                            f"{p1_name}/{p2_name}",
+                            df_filtered["aob_rank"].loc[k],
+                            "left",
+                            opacity_check(
+                                "aob",
+                                df_filtered["set1"].loc[k],
+                                df_filtered["set2"].loc[k],
+                                df_filtered["set3"].loc[k],
+                            ),
+                        )
+                    else:
+                        match_name_histo(
+                            TABLE_PLAYERS[
+                                TABLE_PLAYERS["id_player"]
+                                == df_filtered["aob_player_id"].loc[k]
+                            ]
+                            .reset_index(drop=True)["name"]
+                            .loc[0],
+                            df_filtered["aob_rank"].loc[k],
+                            "left",
+                            opacity_check(
+                                "aob",
+                                df_filtered["set1"].loc[k],
+                                df_filtered["set2"].loc[k],
+                                df_filtered["set3"].loc[k],
+                            ),
+                        )
+                with r1c2:
+                    # Scores des différents sets
+                    match_score_histo(
+                        df_filtered["set1"].loc[k],
+                        df_filtered["set2"].loc[k],
+                        df_filtered["set3"].loc[k],
+                    )
+                with r1c3:
+                    # Joueurs de l'extérieur
+                    match_name_histo(
+                        df_filtered["opponent_player"].loc[k],
+                        df_filtered["opponent_rank"].loc[k],
+                        "right",
+                        opacity_check(
+                            "opponent",
+                            df_filtered["set1"].loc[k],
+                            df_filtered["set2"].loc[k],
+                            df_filtered["set3"].loc[k],
+                        ),
+                    )
