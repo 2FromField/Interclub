@@ -521,7 +521,7 @@ draw_box = """
 # Gestionnaire des colonnes latérales d'affichage des noms de joueurs
 def match_name_histo(name, rank, side, opacity):
     st.markdown(
-        f"<span style='font-size:1.3rem;opacity:{opacity};float:{side}'>{name} ({rank})</span>",
+        f"<span style='font-size:1rem;opacity:{opacity};float:{side}'>{name} ({rank})</span>",
         unsafe_allow_html=True,
     )
 
@@ -532,29 +532,29 @@ def match_score_histo(set1, set2, set3=None):
         c1, c2, c3 = st.columns(3, gap="small")
         with c1:
             st.markdown(
-                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
+                f"<div style='font-size:1rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
                 unsafe_allow_html=True,
             )
         with c2:
             st.markdown(
-                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
+                f"<div style='font-size:1rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
                 unsafe_allow_html=True,
             )
         with c3:
             st.markdown(
-                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set3.replace('/','-')}</div>",
+                f"<div style='font-size:1rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set3.replace('/','-')}</div>",
                 unsafe_allow_html=True,
             )
     else:
         c1, c2 = st.columns(2, gap="small")
         with c1:
             st.markdown(
-                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
+                f"<div style='font-size:1rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set1.replace('/','-')}</div>",
                 unsafe_allow_html=True,
             )
         with c2:
             st.markdown(
-                f"<div style='font-size:1.3rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
+                f"<div style='font-size:1rem;opacity:1;text-align:center;background-color:white; color:black; margin-bottom:15px'>{set2.replace('/','-')}</div>",
                 unsafe_allow_html=True,
             )
 
@@ -615,12 +615,12 @@ def box_color_histo(
             )
         with c2:
             st.markdown(
-                f"<span style='font-size:1.3rem;opacity:1;float:right'>{aob_score}</span>",
+                f"<span style='font-size:1.7rem;opacity:1;float:right'>{aob_score}</span>",
                 unsafe_allow_html=True,
             )
         with c3:
             st.markdown(
-                f"<span style='font-size:1.3rem;opacity:.6;float:left'>{opponent_score}</span>",
+                f"<span style='font-size:1.7rem;opacity:.6;float:left'>{opponent_score}</span>",
                 unsafe_allow_html=True,
             )
         with c4:

@@ -5,8 +5,6 @@ import utils
 # --- Configuration de la page
 st.set_page_config(page_title="Record", page_icon="🗂️", layout="wide")
 
-st.title("Enregistrer une rencontre")
-
 # Accès aux données
 
 
