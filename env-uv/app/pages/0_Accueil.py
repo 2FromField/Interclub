@@ -11,10 +11,15 @@ TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
 
 
 # Upload d'image en local
-def img_to_html(path: str, alt="image", style="max-width:100%; height:auto;"):
-    data = Path(path).read_bytes()
+def img_to_html(
+    rel_path_from_app_dir: str, alt="image", style="max-width:100%; height:auto;"
+):
+    # __file__ = app/pages/0_Accueil.py  → parents[1] = app/
+    app_dir = Path(__file__).resolve().parents[1]
+    path = (app_dir / rel_path_from_app_dir).resolve()  # ex: "assets/img/AOB_LOGO.jpg"
+    data = path.read_bytes()  # lève clairement si absent
+    ext = path.suffix.lstrip(".").lower()
     b64 = base64.b64encode(data).decode()
-    ext = Path(path).suffix.lstrip(".").lower()
     return f'<img src="data:image/{ext};base64,{b64}" alt="{alt}" style="{style}">'
 
 
