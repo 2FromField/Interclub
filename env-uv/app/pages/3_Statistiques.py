@@ -166,13 +166,22 @@ st.dataframe(df, use_container_width=True)
 if df.empty or "player" not in df.columns:
     st.info("Aucune donnée à tracer.")
 else:
-    df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y", errors="coerce")
+    # Dates
+    df["date"] = pd.to_datetime(df["date"], dayfirst=True, errors="coerce")
 
-    # --- Déplier les lignes simple/double en lignes unitaires ---
+    # --- match_type à partir de type_match: SH/SD -> S, DH/DD -> D, MX -> M ---
+    # si ta colonne s'appelle déjà "match_type", commente ces 2 lignes
+    df["match_type"] = df["type_match"].astype(str).str[0].str.upper()
+    df["match_type_label"] = (
+        df["match_type"]
+        .map({"S": "Simple", "D": "Double", "M": "Mixte"})
+        .fillna("Autre")
+    )
+
+    # --- Split simple/double en lignes unitaires ---
     def split2(s: pd.Series):
-        """Retourne (p1, p2) en découpant sur '/', robuste si série vide."""
         s = s.fillna("").astype(str)
-        parts = s.str.split("/", n=1)  # -> Series de listes/None
+        parts = s.str.split("/", n=1)
         p1 = parts.str[0].fillna("").str.strip()
         p2 = parts.str[1].fillna("").str.strip()
         return p1, p2
@@ -191,6 +200,8 @@ else:
                     "player": p1,
                     "rank": r1,
                     "pts": pt1,
+                    "match_type": df["match_type"],
+                    "match_type_label": df["match_type_label"],
                 }
             ),
             pd.DataFrame(
@@ -201,47 +212,108 @@ else:
                     "player": p2,
                     "rank": r2,
                     "pts": pt2,
+                    "match_type": df["match_type"],
+                    "match_type_label": df["match_type_label"],
                 }
             ),
         ],
         ignore_index=True,
     )
 
-    # garder seulement les lignes avec un player non vide
+    # nettoyer
     unit_rows = unit_rows[unit_rows["player"].str.len() > 0].copy()
-
-    # normaliser rank/pts
     unit_rows["rank"] = unit_rows["rank"].str.strip()
     unit_rows["pts"] = pd.to_numeric(
         unit_rows["pts"].str.replace(",", "."), errors="coerce"
     )
 
-    # ordre de l'axe Y (catégoriel)
+    # Axe Y catégoriel (N1 en haut)
     unit_rows["rank"] = pd.Categorical(
         unit_rows["rank"], categories=utils.CLASSEMENTS, ordered=True
     )
 
-    # --- Sélection du joueur puis tracé ---
+    # --- Sélection joueur ---
     who = st.session_state.get("dd_player_filter")
-
-    if who != "-- Tous les joueurs --":
+    if who and who != "-- Tous les joueurs --":
         df_player = unit_rows[unit_rows["player"] == who].sort_values("date")
-        #
+
         if df_player.empty:
             st.warning(f"Aucune donnée pour {who}.")
         else:
-            chart = (
+            # ton line chart existant (df_player + rank catégoriel)
+            base = (
                 alt.Chart(df_player)
                 .mark_line(point=True, interpolate="step-after")
                 .encode(
                     x=alt.X("date:T", title="Date"),
-                    y=alt.Y("rank:O", sort=utils.CLASSEMENTS, title="Classement"),
-                    tooltip=[
-                        alt.Tooltip("date:T"),
-                        alt.Tooltip("rank:N"),
-                        alt.Tooltip("pts:Q", title="Points"),
-                    ],
+                    y=alt.Y(
+                        "pts:Q",
+                        scale=alt.Scale(domain=[300, 2000]),
+                        title="Points de classement",
+                    ),
+                    tooltip=["date:T", "rank:N", "pts:Q"],
                 )
-                .properties(height=320, title=f"Évolution du classement — {who}")
+                .properties(height=320)
             )
+
+            # --- LIGNE + ANNOTATION ---
+            # 2) Seuils multiples (valeur Y + label + couleur)
+            thresholds = [
+                {"y": 400, "label": "P12/NC", "color": "#b2af0061"},
+                {"y": 600, "label": "P11", "color": "#b2af0061"},
+                {"y": 800, "label": "P10", "color": "#b2af0061"},
+                {"y": 1000, "label": "D9", "color": "#cb87006f"},
+                {"y": 1200, "label": "D8", "color": "#cb87006f"},
+                {"y": 1400, "label": "D7", "color": "#cb87006f"},
+                {"y": 1600, "label": "R6", "color": "#cb000062"},
+                {"y": 1800, "label": "R5", "color": "#cb000062"},
+                {"y": 2000, "label": "R4", "color": "#cb000062"},
+            ]
+            lines_df = pd.DataFrame(thresholds)
+
+            # Assure que l’échelle Y inclut tous les seuils
+            y_min = min(df_player["pts"].min(), lines_df["y"].min())
+            y_max = max(df_player["pts"].max(), lines_df["y"].max())
+            base = base.encode(
+                y=alt.Y(
+                    "pts:Q",
+                    title="Points de classement",
+                    scale=alt.Scale(domain=[y_min, y_max]),
+                )
+            )
+
+            # 3) Règles horizontales (une par ligne du DF)
+            rules = (
+                alt.Chart(lines_df)
+                .mark_rule(strokeDash=[4, 4], strokeWidth=2)
+                .encode(
+                    y="y:Q",
+                    color=alt.Color(
+                        "label:N",
+                        scale=alt.Scale(range=lines_df["color"].tolist()),
+                        legend=None,
+                    ),
+                )
+            )
+
+            # 4) Labels à droite (x = date max)
+            x_max = df_player["date"].max()
+            labels = (
+                alt.Chart(lines_df.assign(x=x_max))
+                .mark_text(align="left", dx=6, dy=-6, fontWeight="bold")
+                .encode(
+                    x="x:T",
+                    y="y:Q",
+                    text="label:N",
+                    color=alt.Color(
+                        "label:N",
+                        scale=alt.Scale(range=lines_df["color"].tolist()),
+                        legend=None,
+                    ),
+                )
+            )
+
+            chart = (base + rules + labels).resolve_scale(x="shared", y="shared")
             st.altair_chart(chart, use_container_width=True)
+    else:
+        st.info("Sélectionnez un joueur pour afficher le graphique.")
