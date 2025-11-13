@@ -81,11 +81,13 @@ if result:
 st.caption(f"{len(df)} matchs trouvés")
 
 # Affichage des résultats
-for i in range(len(df)):
+for i in reversed(range(len(df))):
     if df["aob_score"].loc[i] > df["opponent_score"].loc[i]:
         utils.box_color_histo(
+            df["date"].loc[i],
+            df["journey"].loc[i],
             df["id"].loc[i],
-            df["aob_team"].loc[i],
+            f'{df["aob_team"].loc[i]} ({df["division"].loc[i]})',
             df["opponent_team"].loc[i],
             df["aob_score"].loc[i],
             df["opponent_score"].loc[i],
@@ -93,8 +95,10 @@ for i in range(len(df)):
         )
     elif df["aob_score"].loc[i] < df["opponent_score"].loc[i]:
         utils.box_color_histo(
+            df["date"].loc[i],
+            df["journey"].loc[i],
             df["id"].loc[i],
-            df["aob_team"].loc[i],
+            f'{df["aob_team"].loc[i]} ({df["division"].loc[i]})',
             df["opponent_team"].loc[i],
             df["aob_score"].loc[i],
             df["opponent_score"].loc[i],
@@ -102,8 +106,10 @@ for i in range(len(df)):
         )
     else:
         utils.box_color_histo(
+            df["date"].loc[i],
+            df["journey"].loc[i],
             df["id"].loc[i],
-            df["aob_team"].loc[i],
+            f'{df["aob_team"].loc[i]} ({df["division"].loc[i]})',
             df["opponent_team"].loc[i],
             df["aob_score"].loc[i],
             df["opponent_score"].loc[i],

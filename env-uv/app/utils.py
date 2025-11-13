@@ -640,31 +640,50 @@ def opacity_check(side, set1, set2, set3):
             return 0.6
 
 
+def opacity_check_interclub(aob_score, opponent_score):
+    if aob_score > opponent_score:
+        return 1, 0.6
+    elif aob_score == opponent_score:
+        return 1, 1
+    else:
+        return 0.6, 1
+
+
 # Match remporté par AOB
 def box_color_histo(
-    key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
+    date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
 ):
     with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
         # Ligne principale
         c1, c2, c3, c4 = st.columns(4, gap="small")
         with c1:
             st.markdown(
-                f"<span style='font-size:1.3rem;opacity:1;float:left'>{aob_team}</span>",
+                f"<span style='font-size:1rem;opacity:0.6;float:left'>{journey}</span>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:left; margin-top:-20px'>{aob_team}</span>",
                 unsafe_allow_html=True,
             )
         with c2:
+            st.caption("")
             st.markdown(
-                f"<span style='font-size:1.7rem;opacity:1;float:right'>{aob_score}</span>",
+                f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:right'>{aob_score}</span>",
                 unsafe_allow_html=True,
             )
         with c3:
+            st.caption("")
             st.markdown(
-                f"<span style='font-size:1.7rem;opacity:.6;float:left'>{opponent_score}</span>",
+                f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:left'>{opponent_score}</span>",
                 unsafe_allow_html=True,
             )
         with c4:
             st.markdown(
-                f"<span style='font-size:1.3rem;opacity:.6;float:right'>{opponent_team}</span>",
+                f"<span style='font-size:1rem;opacity:.6;float:right'>{date}</span>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:right; margin-top:-20px'>{opponent_team}</span>",
                 unsafe_allow_html=True,
             )
 
