@@ -154,7 +154,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
     df = df[mask].reset_index(drop=True)
 
 # Dataframe filtrés (df) à partir des dropdowns
-st.dataframe(df, use_container_width=True)
+# st.dataframe(df, use_container_width=True)
 
 
 ##################################################################
