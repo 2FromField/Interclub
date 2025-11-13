@@ -6,23 +6,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime as dt
 
-# Données brutes
-CLASSEMENTS = [
-    "NC",
-    "P12",
-    "P11",
-    "P10",
-    "D9",
-    "D8",
-    "D7",
-    "R6",
-    "R5",
-    "R4",
-    "N3",
-    "N2",
-    "N1",
-]
-
 # --- Accès aux google sheets
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -76,7 +59,63 @@ def append_row_sheet(row: dict, worksheet="Feuille1"):
     ws.append_row(values, value_input_option="USER_ENTERED")
 
 
-# Match de simple (SH,SD)
+# -- Téléchargement des données
+TABLE_INTERCLUB = read_sheet("TABLE_INTERCLUB")
+TABLE_MATCHS = read_sheet("TABLE_MATCHS")
+TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
+
+# Données brutes
+CLASSEMENTS = [
+    "N1",
+    "N2",
+    "N3",
+    "R4",
+    "R5",
+    "R6",
+    "D7",
+    "D8",
+    "D9",
+    "P10",
+    "P11",
+    "P12",
+    "NC",
+]
+
+
+# Créer un dataframe à partir des dictionnaires de chaque match
+def create_df_from_dict(dicts: list):
+    rows = dicts
+
+    # --- 2) Assigner des IDs uniques (évite d’avoir le même id partout)
+    start_id = (int(TABLE_MATCHS["id"].max()) if not TABLE_MATCHS.empty else 0) + 1
+    for i, r in enumerate(rows):
+        r["id"] = start_id + i
+
+    # --- 3) DataFrame final
+    df_matches = pd.DataFrame(rows)
+
+    # (optionnel) ordonner les colonnes
+    cols = [
+        "id",
+        "type_match",
+        "aob_player_id",
+        "opponent_player",
+        "aob_rank",
+        "opponent_rank",
+        "aob_pts",
+        "opponent_pts",
+        "set1",
+        "set2",
+        "set3",
+        "aob_grind",
+        "opponent_grind",
+        "win",
+    ]
+    df_matches = df_matches.reindex(columns=cols)
+    return df_matches
+
+
+# -- Match de simple (SH,SD)
 def simple_match(table, categorie, match):
     (
         title_col_aob,
