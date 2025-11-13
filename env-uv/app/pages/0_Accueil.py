@@ -3,6 +3,7 @@ import base64
 from pathlib import Path
 from streamlit_extras.stylable_container import stylable_container
 import utils
+import pandas as pd
 
 # -- Import des données
 TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
@@ -32,20 +33,15 @@ def table_item(text):
 
 
 # Définir V/D/E
-def match_output_mixte(team):
+def match_output(team):
     df = TABLE_INTERCLUB[(TABLE_INTERCLUB["division"] == team)].reset_index(drop=True)
-    v = (df["aob_score"] > 4).sum()
-    d = (df["aob_score"] < 4).sum()
-    e = (df["aob_score"] == 4).sum()
-    return v, d, e
+    v = (df["aob_score"] > df["opponent_score"]).sum()
+    d = (df["aob_score"] < df["opponent_score"]).sum()
+    e = (df["aob_score"] == df["opponent_score"]).sum()
 
-
-def match_output_men(team):
-    df = TABLE_INTERCLUB[(TABLE_INTERCLUB["division"] == team)].reset_index(drop=True)
-    v = (df["aob_score"] > 3).sum()
-    d = (df["aob_score"] < 3).sum()
-    e = (df["aob_score"] == 3).sum()
-    return v, d, e
+    # Calcul du nombre de points
+    pts = v * 3 + e * 2 + d * 1
+    return v, d, e, pts
 
 
 # -- LAYOUT
@@ -66,62 +62,86 @@ with t2:
         unsafe_allow_html=True,
     )
 
+# Affichage des statistiques du club
+df = pd.DataFrame(
+    {
+        "Equipes": ["PR", "D2", "D3", "D5", "H2", "V3"],
+        "Match(s) joué(s)": [
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "PR"]),
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D2"]),
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D3"]),
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D5"]),
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "H2"]),
+            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "V3"]),
+        ],
+        "Victoire(s)": [
+            str(match_output("PR")[0]),
+            str(match_output("D2")[0]),
+            str(match_output("D3")[0]),
+            str(match_output("D5")[0]),
+            str(match_output("H2")[0]),
+            str(match_output("V3")[0]),
+        ],
+        "Egalité(s)": [
+            str(match_output("PR")[1]),
+            str(match_output("D2")[1]),
+            str(match_output("D3")[1]),
+            str(match_output("D5")[1]),
+            str(match_output("H2")[1]),
+            str(match_output("V3")[1]),
+        ],
+        "Défaite(s)": [
+            str(match_output("PR")[2]),
+            str(match_output("D2")[2]),
+            str(match_output("D3")[2]),
+            str(match_output("D5")[2]),
+            str(match_output("H2")[2]),
+            str(match_output("V3")[2]),
+        ],
+        # "B": ["", "", "", "", "", ""],
+        "Point(s) cumulé(s)": [
+            str(match_output("PR")[3]),
+            str(match_output("D2")[3]),
+            str(match_output("D3")[3]),
+            str(match_output("D5")[3]),
+            str(match_output("H2")[3]),
+            str(match_output("V3")[3]),
+        ],
+    }
+)
 
-with stylable_container(key="box-vert-PR", css_styles=utils.draw_box):
-    c1, c2, c3, c4, c5, c6, c7 = st.columns([2, 1, 1, 1, 1, 1, 1], gap="small")
-    with c1:
-        table_item("Equipes")
-        table_item("PR")
-        table_item("D2")
-        table_item("D3")
-        table_item("D5")
-        table_item("H2")
-        table_item("V3")
-    with c2:
-        table_item("J")
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "PR"]))
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D2"]))
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D3"]))
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D5"]))
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "H2"]))
-        table_item(len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "V3"]))
-    with c3:
-        table_item("V")
-        table_item(str(match_output_mixte("PR")[0]))
-        table_item(str(match_output_mixte("D2")[0]))
-        table_item(str(match_output_mixte("D3")[0]))
-        table_item(str(match_output_mixte("D5")[0]))
-        table_item(str(match_output_mixte("H2")[0]))
-        table_item(str(match_output_mixte("V3")[0]))
-    with c4:
-        table_item("D")
-        table_item(str(match_output_mixte("PR")[1]))
-        table_item(str(match_output_mixte("D2")[1]))
-        table_item(str(match_output_mixte("D3")[1]))
-        table_item(str(match_output_mixte("D5")[1]))
-        table_item(str(match_output_mixte("H2")[1]))
-        table_item(str(match_output_mixte("V3")[1]))
-    with c5:
-        table_item("E")
-        table_item(str(match_output_mixte("PR")[2]))
-        table_item(str(match_output_mixte("D2")[2]))
-        table_item(str(match_output_mixte("D3")[2]))
-        table_item(str(match_output_mixte("D5")[2]))
-        table_item(str(match_output_mixte("H2")[2]))
-        table_item(str(match_output_mixte("V3")[2]))
-    with c6:
-        table_item("B")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
-    with c7:
-        table_item("Pts")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
-        table_item("")
+# Trié par le nombre de points
+df = df.sort_values("Point(s) cumulé(s)", ascending=False)
+
+# Affichage sous forme de dataframe
+st.dataframe(df, use_container_width=True, hide_index=True)
+
+st.markdown(
+    """
+<style>
+/* --- CORPS du tableau : centre de la 2e à la n-ième colonne --- */
+[data-testid="stDataFrame"] div[role="rowgroup"] > div[role="row"] 
+  > div[role="gridcell"]:not(:first-child) {
+  display: flex;               /* important pour centrer correctement */
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- EN-TÊTES : centre de la 2e à la n-ième colonne --- */
+[data-testid="stDataFrame"] div[role="rowgroup"] > div[role="row"] 
+  > div[role="columnheader"]:not(:first-child) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Taille de police dans toutes les cellules (corps + header) --- */
+[data-testid="stDataFrame"] div[role="rowgroup"] [role="gridcell"] *,
+[data-testid="stDataFrame"] div[role="rowgroup"] [role="columnheader"] * {
+  font-size: 1.1rem !important;   /* ajuste à ton goût */
+  line-height: 1.2;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
