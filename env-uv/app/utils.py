@@ -145,9 +145,10 @@ def simple_match(table, categorie, match):
     df_filtre = table.loc[mask_div].sort_values("name")
 
     with player_col_aob:
+        gender = "H" if match in ["sh1", "sh2", "sh3", "sh4"] else "F"
         name_aob = st.selectbox(
             "Joueur(s)",
-            df_filtre["name"].to_list(),
+            df_filtre[(df_filtre["gender"] == gender)]["name"].to_list(),
             key=f"{match}_aob_name",
         )
 
@@ -286,9 +287,10 @@ def double_match(table, categorie, match):
     df_filtre = table.loc[mask_div].sort_values("name")
 
     with player_col_aob1:
+        gender = "H" if match in ["dh", "dh1", "dh2", "mx1", "mx2", "mx"] else "F"
         name_aob1 = st.selectbox(
             "Joueur(s)",
-            df_filtre["name"].to_list(),
+            df_filtre[(df_filtre["gender"] == gender)]["name"].to_list(),
             key=f"{match}_aob1_name",
         )
 
@@ -342,9 +344,10 @@ def double_match(table, categorie, match):
         # st.caption("EXT")
 
     with player_col_aob2:
+        gender = "H" if match in ["dh", "dh1", "dh2"] else "F"
         name_aob2 = st.selectbox(
             "",
-            options=df_filtre["name"].to_list(),
+            options=df_filtre[(df_filtre["gender"] == gender)]["name"].to_list(),
             key=f"{match}_aob2_name",
             label_visibility="collapsed",
         )

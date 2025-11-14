@@ -887,31 +887,33 @@ if submitted:
                     ]
                 )
                 #
+                row_interclub = {
+                    # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
+                    "id": len(INTERCLUB_TABLE) + 1,
+                    "date": str(date_match),
+                    "journey": f"J{journey}",
+                    "division": categorie,
+                    "aob_team": aob_team,
+                    "opponent_team": opponent_team,
+                    "aob_score": match_df["win"].fillna("").str.count("aob").sum(),
+                    "opponent_score": match_df["win"]
+                    .fillna("")
+                    .str.count("opponent")
+                    .sum(),
+                }
+                # Mise à jour de la table INTERCLUB
+                try:
+                    utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
+                    st.session_state["flash"] = (
+                        "success",
+                        "✅ Mise à jour de la table INTERCLUB effectuée !",
+                    )
+                except Exception as e:
+                    st.session_state["flash"] = (
+                        "error",
+                        f"❌ Impossible de mettre à jour la table INTERCLUB : {e}",
+                    )
                 st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
                 st.rerun()
         except Exception as e:
             st.session_state["flash"] = ("error", f"❌ Impossible d'enregistrer : {e}")
-
-        row_interclub = {
-            # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
-            "id": len(INTERCLUB_TABLE) + 1,
-            "date": str(date_match),
-            "journey": f"J{journey}",
-            "division": categorie,
-            "aob_team": aob_team,
-            "opponent_team": opponent_team,
-            "aob_score": match_df["win"].fillna("").str.count("aob").sum(),
-            "opponent_score": match_df["win"].fillna("").str.count("opponent").sum(),
-        }
-        # Mise à jour de la table INTERCLUB
-        try:
-            utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
-            st.session_state["flash"] = (
-                "success",
-                "✅ Mise à jour de la table INTERCLUB effectuée !",
-            )
-        except Exception as e:
-            st.session_state["flash"] = (
-                "error",
-                f"❌ Impossible de mettre à jour la table INTERCLUB : {e}",
-            )
