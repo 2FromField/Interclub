@@ -240,7 +240,10 @@ else:
         if df_player.empty:
             st.warning(f"Aucune donnée pour {who}.")
         else:
-            # ton line chart existant (df_player + rank catégoriel)
+            # Couleur des catégories de match
+            domain_base = ["Simple", "Double", "Mixte"]  # adapte à tes valeurs
+            range_base = ["#2563eb", "#10b981", "#f59e0b"]  # ta palette
+            # Linechart existant (df_player + rank catégoriel)
             base = (
                 alt.Chart(df_player)
                 .mark_line(point=True, interpolate="step-after")
@@ -250,6 +253,11 @@ else:
                         "pts:Q",
                         scale=alt.Scale(domain=[300, 2000]),
                         title="Points de classement",
+                    ),
+                    color=alt.Color(
+                        "match_type_label:N",
+                        scale=alt.Scale(domain=domain_base, range=range_base),
+                        title="Type de match",
                     ),
                     tooltip=["date:T", "rank:N", "pts:Q"],
                 )
@@ -313,7 +321,9 @@ else:
                 )
             )
 
-            chart = (base + rules + labels).resolve_scale(x="shared", y="shared")
+            chart = (base + rules + labels).resolve_scale(
+                color="independent", x="shared", y="shared"
+            )
             st.altair_chart(chart, use_container_width=True)
     else:
         st.info("Sélectionnez un joueur pour afficher le graphique.")
