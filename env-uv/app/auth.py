@@ -21,7 +21,6 @@ def check_pin(page_key: str, secret_path: str = "record_lock.pin"):
         .pin-dots-wrapper {
             display: flex;
             justify-content: center;
-            margin-left: -22%;
         }
         .pin-dots {
             font-size: 2.2rem;
@@ -88,7 +87,7 @@ def check_pin(page_key: str, secret_path: str = "record_lock.pin"):
     ]
 
     for r in rows:
-        cols = st.columns(3)
+        cols = st.columns(3, gap="small")  # ⬅️ gap réduit
         for label, col in zip(r, cols):
             with col:
                 if label.isdigit():
