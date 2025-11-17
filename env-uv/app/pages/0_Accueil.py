@@ -6,6 +6,8 @@ import utils
 import pandas as pd
 from auth import check_password
 
+# Faire le calendrier des équipes
+
 # Vérification du password
 if not check_password():
     st.stop()

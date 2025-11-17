@@ -5,178 +5,18 @@ import sqlite3
 import pandas as pd
 from streamlit_extras.stylable_container import stylable_container
 from auth import check_password
+import numpy as np
 
 # Vérification du password
-if not check_password():
-    st.stop()
+# if not check_password():
+#     st.stop()
 
 st.set_page_config(page_title="Statistiques", layout="wide")
 
 st.title("Statistiques")
 
 ##################################################################
-#                            LAYOUT                              #
-##################################################################
-c1, c2 = st.columns([2, 5], gap="small")
-with c1:
-    options_teams = ["-- Toutes les équipes --"] + utils.TABLE_INTERCLUB[
-        "division"
-    ].unique().tolist()
-    filter_by_teal = st.selectbox(
-        "Filtrer par équipe:",
-        options_teams,
-        index=0,
-        key="dd_team_filter",
-    )
-with c2:
-    if st.session_state.get("dd_team_filter") == "-- Toutes les équipes --":
-        options_players = ["-- Tous les joueurs --"] + utils.TABLE_PLAYERS[
-            "name"
-        ].unique().tolist()
-        filter_by_player = st.selectbox(
-            "Filtrer par joueur:",
-            options_players,
-            index=0,
-            key="dd_player_filter",
-        )
-    else:
-        filtered_df = utils.TABLE_PLAYERS[
-            utils.TABLE_PLAYERS["division"]
-            .fillna("")
-            .str.contains(str(st.session_state.get("dd_team_filter")), na=False)
-        ].reset_index(drop=True)
-        #
-        options_players = ["-- Tous les joueurs --"] + utils.TABLE_PLAYERS[
-            (
-                utils.TABLE_PLAYERS["division"]
-                .fillna("")
-                .str.contains(str(st.session_state.get("dd_team_filter")), na=False)
-            )
-        ]["name"].unique().tolist()
-        filter_by_player = st.selectbox(
-            "Filtrer par joueur:",
-            options_players,
-            index=0,
-            key="dd_player_filter",
-        )
-
-##################################################################
-#                     GESTION FILTRES                            #
-##################################################################
-
-m_ic = utils.TABLE_MATCHS.merge(
-    utils.TABLE_INTERCLUB[["id", "date", "division", "aob_team", "opponent_team"]],
-    left_on="id",
-    right_on="id",
-    how="left",
-)
-
-
-# --- helpers ---
-def split2(series: pd.Series):
-    """Retourne (p1, p2) en découpant à '/', avec strip et '' si absent."""
-    s = series.fillna("").astype(str).str.strip()
-    parts = s.str.split("/", n=1, expand=True)
-    p1 = parts[0].fillna("").str.strip()
-    p2 = (
-        (parts[1].fillna("").str.strip())
-        if parts.shape[1] > 1
-        else pd.Series([""] * len(s), index=s.index)
-    )
-    return p1, p2
-
-
-def split2_col(df: pd.DataFrame, col: str):
-    """Applique split2 sur df[col] si la colonne existe, sinon sur une série vide."""
-    base = df[col] if col in df.columns else pd.Series([""] * len(df), index=df.index)
-    return split2(base)
-
-
-def join_if_two(p1: pd.Series, p2: pd.Series, sep=" / "):
-    """'A' + ' / B' seulement si p2 non vide."""
-    p1 = p1.fillna("").astype(str)
-    p2 = p2.fillna("").astype(str)
-    return p1.where(p2.eq(""), p1 + sep + p2)
-
-
-# 2) Découper les champs potentiellement composés
-m_ic["aob_p1_id"], m_ic["aob_p2_id"] = split2_col(m_ic, "aob_player_id")
-m_ic["aob_rank_p1"], m_ic["aob_rank_p2"] = split2_col(m_ic, "aob_rank")
-m_ic["aob_pts_p1"], m_ic["aob_pts_p2"] = split2_col(m_ic, "aob_pts")
-
-# (optionnel) caster les points en numériques
-for col in ["aob_pts_p1", "aob_pts_p2"]:
-    m_ic[col] = pd.to_numeric(m_ic[col], errors="coerce")
-
-# 3) Résoudre noms via mapping id → name
-players = utils.TABLE_PLAYERS.copy()
-players["id_norm"] = players["id_player"].astype(str).str.strip()
-id_to_name = players.set_index("id_norm")["name"].to_dict()
-
-m_ic["aob_p1_name"] = (
-    m_ic["aob_p1_id"].astype(str).str.strip().map(id_to_name).fillna("")
-)
-m_ic["aob_p2_name"] = (
-    m_ic["aob_p2_id"].astype(str).str.strip().map(id_to_name).fillna("")
-)
-
-# 4) Colonnes combinées (si 2 joueurs)
-m_ic["player"] = join_if_two(m_ic["aob_p1_name"], m_ic["aob_p2_name"])
-m_ic["rank"] = join_if_two(m_ic["aob_rank_p1"], m_ic["aob_rank_p2"])
-
-# pts en texte lisible ("12 / 8"), sans 'None'
-p1_txt = m_ic["aob_pts_p1"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
-p2_txt = m_ic["aob_pts_p2"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
-m_ic["pts"] = join_if_two(p1_txt, p2_txt)
-
-# 5) Sélection finale
-result = m_ic[
-    [
-        "id",
-        "type_match",
-        "date",
-        "division",
-        "aob_team",
-        "player",
-        "rank",
-        "pts",
-        "win",
-        "aob_grind",
-        "opponent_grind",
-    ]
-].reset_index(drop=True)
-
-# Filtre d'équipe
-df = result.copy()
-
-team_sel = st.session_state.get("dd_team_filter")
-player_sel = st.session_state.get("dd_player_filter")
-
-# 1) Filtre équipe (si sélectionnée)
-if team_sel and team_sel != "-- Toutes les équipes --":
-    df = df[df["division"] == team_sel].reset_index(drop=True)
-
-# 2) Filtre joueur (match par token, insensible à la casse)
-if player_sel and player_sel != "-- Tous les joueurs --":
-    target = player_sel.strip().casefold()
-    # explode pour un match vectorisé sur chaque token séparé par '/'
-    tokens = (
-        df["player"]
-        .fillna("")
-        .str.split("/")  # -> liste de noms
-        .explode()  # une ligne par nom
-        .str.strip()
-        .str.casefold()  # normalisation
-    )
-    mask = tokens.eq(target).groupby(level=0).any()  # any par ligne d'origine
-    df = df[mask].reset_index(drop=True)
-
-# Dataframe filtrés (df) à partir des dropdowns
-# st.dataframe(df, use_container_width=True)
-
-
-##################################################################
-#                       STATS JOUEUR                             #
+#                         FONCTIONS                              #
 ##################################################################
 
 
@@ -276,11 +116,281 @@ def kpi_card(title, value, sub=None):
     )
 
 
-# --- 5 colonnes KPI ---
-player_name = st.session_state.get("dd_player_filter")
-if player_name != "-- Tous les joueurs --":
+# Calcul du pourcentage de victoire selon le type de match
+def safe_rate(wins: int, total: int, pct=True, ndigits=1):
+    if total == 0:
+        return "—" if pct else "0/0"  # à toi de choisir l’affichage
+    if pct:
+        return f"{round(100 * wins / total, ndigits)}%"
+    else:
+        return f"{wins}/{total}"
+
+
+def group_rate(df, types):
+    sub = df[df["type_match"].isin(types)]
+    total = len(sub)
+    wins = (sub["win"].str.lower() == "aob").sum()
+    return safe_rate(wins, total, pct=True, ndigits=0)  # % sans décimal
+    # ou pct=False pour "wins/total"
+
+
+##################################################################
+#                            LAYOUT                              #
+##################################################################
+c1, c2 = st.columns([2, 5], gap="small")
+with c1:
+    options_teams = ["-- Toutes les équipes --"] + utils.TABLE_INTERCLUB[
+        "division"
+    ].unique().tolist()
+    filter_by_teal = st.selectbox(
+        "Filtrer par équipe:",
+        options_teams,
+        index=0,
+        key="dd_team_filter",
+    )
+with c2:
+    if st.session_state.get("dd_team_filter") == "-- Toutes les équipes --":
+        options_players = ["-- Tous les joueurs --"] + utils.TABLE_PLAYERS[
+            "name"
+        ].unique().tolist()
+        filter_by_player = st.selectbox(
+            "Filtrer par joueur:",
+            options_players,
+            index=0,
+            key="dd_player_filter",
+        )
+    else:
+        filtered_df = utils.TABLE_PLAYERS[
+            utils.TABLE_PLAYERS["division"]
+            .fillna("")
+            .str.contains(str(st.session_state.get("dd_team_filter")), na=False)
+        ].reset_index(drop=True)
+        #
+        options_players = ["-- Tous les joueurs --"] + utils.TABLE_PLAYERS[
+            (
+                utils.TABLE_PLAYERS["division"]
+                .fillna("")
+                .str.contains(str(st.session_state.get("dd_team_filter")), na=False)
+            )
+        ]["name"].unique().tolist()
+        filter_by_player = st.selectbox(
+            "Filtrer par joueur:",
+            options_players,
+            index=0,
+            key="dd_player_filter",
+        )
+
+##################################################################
+#                     GESTION FILTRES                            #
+##################################################################
+
+TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
+
+m_ic = utils.TABLE_MATCHS.merge(
+    TABLE_INTERCLUB[["id", "date", "division", "aob_team", "opponent_team"]],
+    left_on="id",
+    right_on="id",
+    how="left",
+)
+
+
+# --- helpers ---
+def split2(series: pd.Series):
+    """Retourne (p1, p2) en découpant à '/', avec strip et '' si absent."""
+    s = series.fillna("").astype(str).str.strip()
+    parts = s.str.split("/", n=1, expand=True)
+    p1 = parts[0].fillna("").str.strip()
+    p2 = (
+        (parts[1].fillna("").str.strip())
+        if parts.shape[1] > 1
+        else pd.Series([""] * len(s), index=s.index)
+    )
+    return p1, p2
+
+
+def split2_col(df: pd.DataFrame, col: str):
+    """Applique split2 sur df[col] si la colonne existe, sinon sur une série vide."""
+    base = df[col] if col in df.columns else pd.Series([""] * len(df), index=df.index)
+    return split2(base)
+
+
+def join_if_two(p1: pd.Series, p2: pd.Series, sep=" / "):
+    """'A' + ' / B' seulement si p2 non vide."""
+    p1 = p1.fillna("").astype(str)
+    p2 = p2.fillna("").astype(str)
+    return p1.where(p2.eq(""), p1 + sep + p2)
+
+
+# 2) Découper les champs potentiellement composés
+m_ic["aob_p1_id"], m_ic["aob_p2_id"] = split2_col(m_ic, "aob_player_id")
+m_ic["aob_rank_p1"], m_ic["aob_rank_p2"] = split2_col(m_ic, "aob_rank")
+m_ic["aob_pts_p1"], m_ic["aob_pts_p2"] = split2_col(m_ic, "aob_pts")
+
+# (optionnel) caster les points en numériques
+for col in ["aob_pts_p1", "aob_pts_p2"]:
+    m_ic[col] = pd.to_numeric(m_ic[col], errors="coerce")
+
+# 3) Résoudre noms via mapping id → name
+players = utils.TABLE_PLAYERS.copy()
+players["id_norm"] = players["id_player"].astype(str).str.strip()
+id_to_name = players.set_index("id_norm")["name"].to_dict()
+
+m_ic["aob_p1_name"] = (
+    m_ic["aob_p1_id"].astype(str).str.strip().map(id_to_name).fillna("")
+)
+m_ic["aob_p2_name"] = (
+    m_ic["aob_p2_id"].astype(str).str.strip().map(id_to_name).fillna("")
+)
+
+# 4) Colonnes combinées (si 2 joueurs)
+m_ic["player"] = join_if_two(m_ic["aob_p1_name"], m_ic["aob_p2_name"])
+m_ic["rank"] = join_if_two(m_ic["aob_rank_p1"], m_ic["aob_rank_p2"])
+
+# pts en texte lisible ("12 / 8"), sans 'None'
+p1_txt = m_ic["aob_pts_p1"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
+p2_txt = m_ic["aob_pts_p2"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
+m_ic["pts"] = join_if_two(p1_txt, p2_txt)
+
+# 5) Sélection finale
+result = m_ic[
+    [
+        "id",
+        "type_match",
+        "date",
+        "division",
+        "aob_team",
+        "player",
+        "rank",
+        "pts",
+        "win",
+        "aob_grind",
+        "opponent_grind",
+    ]
+].reset_index(drop=True)
+
+# Filtre d'équipe
+df = result.copy()
+
+# Types de match
+S_TYPES = {"SH1", "SH2", "SH3", "SH4", "SD1", "SD2"}
+D_TYPES = {"DH", "DH1", "DH2", "DD", "DD1", "DD2"}
+M_TYPES = {"MX", "MX1", "MX2"}
+
+team_sel = st.session_state.get("dd_team_filter")
+player_sel = st.session_state.get("dd_player_filter")
+
+# 1) Filtre équipe (si sélectionnée)
+if (
+    team_sel
+    and team_sel != "-- Toutes les équipes --"
+    and player_sel == "-- Tous les joueurs --"
+):
+    df = df[df["division"] == team_sel].reset_index(drop=True)
+
+    WIN_ICON = "🔥"
+    COLD_ICON = "❄️"
+
+    c1, c2, c3, c4, c5 = st.columns(5, gap="small")
+    with c1:
+        kpi_card("Rencontres jouées", f'{df["id"].nunique()}', "saison 2025/26")
+    with c2:
+        # Définir V/D/E
+        def match_output(team):
+            df = TABLE_INTERCLUB[(TABLE_INTERCLUB["division"] == team)].reset_index(
+                drop=True
+            )
+            v = (df["aob_score"] > df["opponent_score"]).sum()
+            d = (df["aob_score"] < df["opponent_score"]).sum()
+            e = (df["aob_score"] == df["opponent_score"]).sum()
+
+            # Calcul du nombre de points
+            pts = v * 3 + e * 2 + d * 1
+            return v, e, d, pts
+
+        kpi_card(
+            "Résultats",
+            f"{str(match_output(team_sel)[0])} / {str(match_output(team_sel)[1])} / {str(match_output(team_sel)[2])}",
+            "Victoire(s) / Egalité(s) / Défaite(s)",
+        )
+    with c3:
+        kpi_card(
+            "Matchs joués",
+            f'{len(df[(df["type_match"].isin(["SH1","SH2","SH3","SH4","SD1","SD2"]))])} / {len(df[(df["type_match"].isin(["DH","DH1","DH2","DD", "DD1"]))])} / {len(df[(df["type_match"].isin(["MX","MX1","MX2"]))])}',
+            "Simple / Double / Mixte",
+        )
+    with c4:
+        s_rate = group_rate(df, S_TYPES)
+        d_rate = group_rate(df, D_TYPES)
+        m_rate = group_rate(df, M_TYPES)
+
+        kpi_card(
+            "Victoires",
+            f'{len(df[(df["type_match"].isin(["SH1","SH2","SH3","SH4","SD1","SD2"])) & (df["win"] == "aob")])} / {len(df[(df["type_match"].isin(["DH","DH1","DH2","DD", "DD1", "DD2"])) & (df["win"] == "aob")])} / {len(df[(df["type_match"].isin(["MX","MX1","MX2"])) & (df["win"] == "aob")])}',
+            f"{s_rate} / {d_rate} / {m_rate}",
+        )
+    with c5:
+        interclub_team_sel = TABLE_INTERCLUB[
+            (TABLE_INTERCLUB["division"] == team_sel)
+        ].reset_index(drop=True)
+
+        interclub_team_sel["result"] = np.where(
+            interclub_team_sel["aob_score"] >= interclub_team_sel["opponent_score"],
+            "W",
+            np.where(
+                interclub_team_sel["aob_score"] < interclub_team_sel["opponent_score"],
+                "L",
+                "D",
+            ),  # "D" pour nul
+        )
+
+        matchs_list = interclub_team_sel["result"].tolist()
+
+        #
+        def current_streak(results):
+            if not results:
+                return None, 0
+
+            last = results[-1]  # résultat du dernier match
+            streak = 0
+
+            for r in reversed(results):
+                if r == last:
+                    streak += 1
+                else:
+                    break
+
+            if last == "W":
+                return "win", streak
+            else:
+                return "loss", streak
+
+        kpi_text, kpi_icon = (
+            ("Win Streak", WIN_ICON)
+            if current_streak(matchs_list)[0] == "win"
+            else ("Lose Streak", COLD_ICON)
+        )
+
+        #
+        kpi_card("Série", f"{current_streak(matchs_list)[1]} {kpi_icon}", kpi_text)
+
+# 2) Filtre joueur (match par token, insensible à la casse)
+elif player_sel and player_sel != "-- Tous les joueurs --":
+    target = player_sel.strip().casefold()
+    # explode pour un match vectorisé sur chaque token séparé par '/'
+    tokens = (
+        df["player"]
+        .fillna("")
+        .str.split("/")  # -> liste de noms
+        .explode()  # une ligne par nom
+        .str.strip()
+        .str.casefold()  # normalisation
+    )
+    mask = tokens.eq(target).groupby(level=0).any()  # any par ligne d'origine
+    df = df[mask].reset_index(drop=True)
+
+    #
     df_kpi = df.copy()
-    # -- Mise à jour des éléments visuels
+
     c1, c2, c3, c4, c5 = st.columns(5, gap="small")
     with c1:
         kpi_card("Rencontres jouées", f'{df_kpi["id"].nunique()}', "saison 2025/26")
@@ -291,38 +401,17 @@ if player_name != "-- Tous les joueurs --":
             "Simple / Double / Mixte",
         )
     with c3:
-        # Calcul du pourcentage de victoire selon le type de match
-        def safe_rate(wins: int, total: int, pct=True, ndigits=1):
-            if total == 0:
-                return "—" if pct else "0/0"  # à toi de choisir l’affichage
-            if pct:
-                return f"{round(100 * wins / total, ndigits)}%"
-            else:
-                return f"{wins}/{total}"
-
-        S_TYPES = {"SH1", "SH2", "SH3", "SH4", "SD1", "SD2"}
-        D_TYPES = {"DH", "DH1", "DH2", "DD", "DD1", "DD2"}
-        M_TYPES = {"MX", "MX1", "MX2"}
-
-        def group_rate(df, types):
-            sub = df[df["type_match"].isin(types)]
-            total = len(sub)
-            wins = (sub["win"].str.lower() == "aob").sum()
-            return safe_rate(wins, total, pct=True, ndigits=0)  # % sans décimal
-            # ou pct=False pour "wins/total"
-
         s_rate = group_rate(df_kpi, S_TYPES)
         d_rate = group_rate(df_kpi, D_TYPES)
         m_rate = group_rate(df_kpi, M_TYPES)
 
-        kpi_text = f"{s_rate} / {d_rate} / {m_rate}"
         kpi_card(
             "Victoires",
             f'{len(df_kpi[(df_kpi["type_match"].isin(["SH1","SH2","SH3","SH4","SD1","SD2"])) & (df_kpi["win"] == "aob")])} / {len(df_kpi[(df_kpi["type_match"].isin(["DH","DH1","DH2","DD", "DD1", "DD2"])) & (df_kpi["win"] == "aob")])} / {len(df_kpi[(df_kpi["type_match"].isin(["MX","MX1","MX2"])) & (df_kpi["win"] == "aob")])}',
             f"{s_rate} / {d_rate} / {m_rate}",
         )
     with c4:
-        gs, us, gd, ud, gm, um = calculating_grind(df_kpi, player_name)
+        gs, us, gd, ud, gm, um = calculating_grind(df_kpi, player_sel)
         kpi_card(
             "Points remportés",
             f"{gs-us} / {gd-ud} / {gm-um}",
@@ -436,29 +525,21 @@ if player_name != "-- Tous les joueurs --":
 
             return best_simple, best_double, best_mixte
 
-        player_best_rank = best_ranks_lists(df_kpi, player_name)
+        player_best_rank = best_ranks_lists(df_kpi, player_sel)
         kpi_card(
             "Meilleurs rangs",
             f"{player_best_rank[0]} / {player_best_rank[1]} / {player_best_rank[2]}",
             "Simple / Double / Mixte",
         )
-    # st.dataframe(df_kpi)
+
 else:
-    st.info("Sélectionnez un joueur pour afficher ses statistiques d'interclub")
-    c1, c2, c3, c4, c5 = st.columns(5, gap="small")
-    with c1:
-        kpi_card("Rencontres jouées", "...", "saison 2025/26")
-    with c2:
-        kpi_card("Matchs joués", ".. / .. / ..", "Simple / Double / Mixte")
-    with c3:
-        kpi_card("Victoires", "...", "...%")
-    with c4:
-        kpi_card("Points remportés", "+...", "perdus: -...")
-    with c5:
-        kpi_card("Meilleurs rangs", ".. / .. / ..", "Simple / Double / Mixte")
+    st.info("Sélectionnez un joueur/équipe pour afficher ses statistiques d'interclub")
 
 
-# -- Graphique
+##################################################################
+#                         GRAPHIQUE                              #
+##################################################################
+
 # Si df est vide ou si la colonne 'player' n'existe pas, on sort proprement
 if df.empty or "player" not in df.columns:
     st.info("Aucune donnée à tracer.")

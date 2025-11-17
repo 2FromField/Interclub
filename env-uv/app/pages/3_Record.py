@@ -1,10 +1,10 @@
 from datetime import date
 import streamlit as st
 import utils
-from auth import check_password
+from auth import check_record_password
 
 # Vérification du password
-if not check_password():
+if not check_record_password(page_key="admin", secret_path="admin.password"):
     st.stop()
 
 # --- Configuration de la page
