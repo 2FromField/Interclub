@@ -13,7 +13,9 @@ TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
 
 # Upload d'image en local
 def img_to_html(
-    rel_path_from_app_dir: str, alt="image", style="max-width:100%; height:auto;"
+    rel_path_from_app_dir: str,
+    alt="image",
+    style="max-width:100%; height:auto; text-align: center",
 ):
     # __file__ = app/pages/0_Accueil.py  → parents[1] = app/
     app_dir = Path(__file__).resolve().parents[1]
@@ -41,26 +43,30 @@ def match_output(team):
 
     # Calcul du nombre de points
     pts = v * 3 + e * 2 + d * 1
-    return v, d, e, pts
+    return v, e, d, pts
 
 
 # -- LAYOUT
 
 st.set_page_config(page_title="Accueil", layout="wide")
 
-t1, t2 = st.columns([1, 5])
-with t1:
-    html = f"""
-    <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-    {img_to_html("assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
-    </div>
-    """
-    st.markdown(html, unsafe_allow_html=True)
-with t2:
-    st.markdown(
-        f"<div style='font-size:10rem; text-align:center'>SAISON 2025/26</div>",
-        unsafe_allow_html=True,
-    )
+# t1, t2 = st.columns([1, 5])
+# with t1:
+html = f"""
+<div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
+{img_to_html("assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
+</div>
+"""
+st.markdown(html, unsafe_allow_html=True)
+st.markdown(
+    f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON 2025/26</div>",
+    unsafe_allow_html=True,
+)
+# with t2:
+#     st.markdown(
+#         f"<div style='font-size:10rem; text-align:center'>SAISON 2025/26</div>",
+#         unsafe_allow_html=True,
+#     )
 
 # Affichage des statistiques du club
 df = pd.DataFrame(
