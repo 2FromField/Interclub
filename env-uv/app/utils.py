@@ -653,40 +653,156 @@ def opacity_check_interclub(aob_score, opponent_score):
 
 
 # Match remporté par AOB
+# def box_color_histo(
+#     date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
+# ):
+#     with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
+#         # Ligne principale
+#         c1, c2, c3, c4 = st.columns(4, gap="small")
+#         with c1:
+#             st.markdown(
+#                 f"<span style='font-size:1rem;opacity:0.6;float:left'>{journey}</span>",
+#                 unsafe_allow_html=True,
+#             )
+#             st.markdown(
+#                 f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:left; margin-top:-20px'>{aob_team}</span>",
+#                 unsafe_allow_html=True,
+#             )
+#         with c2:
+#             st.caption("")
+#             st.markdown(
+#                 f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:right'>{aob_score}</span>",
+#                 unsafe_allow_html=True,
+#             )
+#         with c3:
+#             st.caption("")
+#             st.markdown(
+#                 f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:left'>{opponent_score}</span>",
+#                 unsafe_allow_html=True,
+#             )
+#         with c4:
+#             st.markdown(
+#                 f"<span style='font-size:1rem;opacity:.6;float:right'>{date}</span>",
+#                 unsafe_allow_html=True,
+#             )
+#             st.markdown(
+#                 f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:right; margin-top:-20px'>{opponent_team}</span>",
+#                 unsafe_allow_html=True,
+#             )
+
+#         # Toggle détails (à droite)
+#         _left, _sp, _right = st.columns([6, 1, 1])
+#         with _left:
+#             show = st.toggle(
+#                 "Afficher les détails", key=f"details_{key_id}", value=False
+#             )
+
+#         # Détails : s'affichent seulement si activé (slide button)
+#         if show:
+#             TABLE_MATCHS = read_sheet("TABLE_MATCHS")
+#             TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
+#             df_filtered = TABLE_MATCHS[(TABLE_MATCHS["id"] == key_id)].reset_index(
+#                 drop=True
+#             )
+#             #
+#             for k in range(len(df_filtered)):
+#                 r1c1, r1c2, r1c3 = st.columns([4, 2, 4], gap="small")
+#                 with r1c1:
+#                     # Joueurs de l'AOB
+#                     if "/" in str(df_filtered["aob_player_id"].loc[k]):
+#                         p1_id = df_filtered["aob_player_id"].loc[k].split("/")[0]
+#                         p2_id = df_filtered["aob_player_id"].loc[k].split("/")[1]
+#                         #
+#                         p1_name = (
+#                             TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p1_id)]
+#                             .reset_index(drop=True)["name"]
+#                             .loc[0]
+#                         )
+#                         p2_name = (
+#                             TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p2_id)]
+#                             .reset_index(drop=True)["name"]
+#                             .loc[0]
+#                         )
+#                         match_name_histo(
+#                             f"{p1_name}/{p2_name}",
+#                             df_filtered["aob_rank"].loc[k],
+#                             "left",
+#                             opacity_check(
+#                                 "aob",
+#                                 df_filtered["set1"].loc[k],
+#                                 df_filtered["set2"].loc[k],
+#                                 df_filtered["set3"].loc[k],
+#                             ),
+#                         )
+#                     else:
+#                         match_name_histo(
+#                             TABLE_PLAYERS[
+#                                 TABLE_PLAYERS["id_player"]
+#                                 == df_filtered["aob_player_id"].loc[k]
+#                             ]
+#                             .reset_index(drop=True)["name"]
+#                             .loc[0],
+#                             df_filtered["aob_rank"].loc[k],
+#                             "left",
+#                             opacity_check(
+#                                 "aob",
+#                                 df_filtered["set1"].loc[k],
+#                                 df_filtered["set2"].loc[k],
+#                                 df_filtered["set3"].loc[k],
+#                             ),
+#                         )
+#                 with r1c2:
+#                     # Scores des différents sets
+#                     match_score_histo(
+#                         df_filtered["set1"].loc[k],
+#                         df_filtered["set2"].loc[k],
+#                         df_filtered["set3"].loc[k],
+#                     )
+#                 with r1c3:
+#                     # Joueurs de l'extérieur
+#                     match_name_histo(
+#                         df_filtered["opponent_player"].loc[k],
+#                         df_filtered["opponent_rank"].loc[k],
+#                         "right",
+#                         opacity_check(
+#                             "opponent",
+#                             df_filtered["set1"].loc[k],
+#                             df_filtered["set2"].loc[k],
+#                             df_filtered["set3"].loc[k],
+#                         ),
+#                     )
+
+
 def box_color_histo(
     date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
 ):
     with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
         # Ligne principale
-        c1, c2, c3, c4 = st.columns(4, gap="small")
+        c1, c2 = st.columns([1, 9], gap="small")
         with c1:
             st.markdown(
-                f"<span style='font-size:1rem;opacity:0.6;float:left'>{journey}</span>",
+                f"<span style='font-size:1rem;opacity:0.6'>{journey}</span>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:left; margin-top:-20px'>{aob_team}</span>",
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; text-align: center; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_score}</span></div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]})'><span style='font-size:1rem; text-align: center; opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_score}</span></div>",
                 unsafe_allow_html=True,
             )
         with c2:
-            st.caption("")
             st.markdown(
-                f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:right'>{aob_score}</span>",
-                unsafe_allow_html=True,
-            )
-        with c3:
-            st.caption("")
-            st.markdown(
-                f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:left'>{opponent_score}</span>",
-                unsafe_allow_html=True,
-            )
-        with c4:
-            st.markdown(
-                f"<span style='font-size:1rem;opacity:.6;float:right'>{date}</span>",
+                f"<span style='font-size:1rem; opacity:.6; float:right'>{date}</span>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:right; margin-top:-20px'>{opponent_team}</span>",
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}; margin-top:-20px'>{aob_team}</span></div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]}); margin-bottom: 15px'><span style='font-size:1rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}; margin-top:-20px'>{opponent_team}</span></div>",
                 unsafe_allow_html=True,
             )
 
