@@ -68,86 +68,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Affichage des statistiques du club
-df = pd.DataFrame(
-    {
-        "Equipes": ["PR", "D2", "D3", "D5", "H2", "V3"],
-        "Match(s) joué(s)": [
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "PR"]),
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D2"]),
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D3"]),
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "D5"]),
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "H2"]),
-            len(TABLE_INTERCLUB[TABLE_INTERCLUB["division"] == "V3"]),
-        ],
-        "Victoire(s)": [
-            str(match_output("PR")[0]),
-            str(match_output("D2")[0]),
-            str(match_output("D3")[0]),
-            str(match_output("D5")[0]),
-            str(match_output("H2")[0]),
-            str(match_output("V3")[0]),
-        ],
-        "Egalité(s)": [
-            str(match_output("PR")[1]),
-            str(match_output("D2")[1]),
-            str(match_output("D3")[1]),
-            str(match_output("D5")[1]),
-            str(match_output("H2")[1]),
-            str(match_output("V3")[1]),
-        ],
-        "Défaite(s)": [
-            str(match_output("PR")[2]),
-            str(match_output("D2")[2]),
-            str(match_output("D3")[2]),
-            str(match_output("D5")[2]),
-            str(match_output("H2")[2]),
-            str(match_output("V3")[2]),
-        ],
-        # "B": ["", "", "", "", "", ""],
-        "Point(s) cumulé(s)": [
-            str(match_output("PR")[3]),
-            str(match_output("D2")[3]),
-            str(match_output("D3")[3]),
-            str(match_output("D5")[3]),
-            str(match_output("H2")[3]),
-            str(match_output("V3")[3]),
-        ],
-    }
-)
+def show_teams(path):
+    html = f"""
+        <div style="display:flex; justify-content:center; padding:8px; border-radius:12px; margin-bottom:30px">
+        {img_to_html(path, alt="Logo", style="width:280px; border-radius:12px;")}
+        </div>
+        """
+    return html
 
-# Trié par le nombre de points
-df = df.sort_values("Point(s) cumulé(s)", ascending=False)
 
-# Affichage sous forme de dataframe
-st.dataframe(df, use_container_width=True, hide_index=True)
+c1, c2, c3 = st.columns(3, gap="small")
+with c1:
+    st.markdown(show_teams("assets/calendar/PR.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/calendar/D5.jpg"), unsafe_allow_html=True)
+with c2:
+    st.markdown(show_teams("assets/calendar/D2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/calendar/H2.jpg"), unsafe_allow_html=True)
+with c3:
+    st.markdown(show_teams("assets/calendar/D3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/calendar/V3.jpg"), unsafe_allow_html=True)
 
-st.markdown(
-    """
-<style>
-/* --- CORPS du tableau : centre de la 2e à la n-ième colonne --- */
-[data-testid="stDataFrame"] div[role="rowgroup"] > div[role="row"] 
-  > div[role="gridcell"]:not(:first-child) {
-  display: flex;               /* important pour centrer correctement */
-  align-items: center;
-  justify-content: center;
-}
-
-/* --- EN-TÊTES : centre de la 2e à la n-ième colonne --- */
-[data-testid="stDataFrame"] div[role="rowgroup"] > div[role="row"] 
-  > div[role="columnheader"]:not(:first-child) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* --- Taille de police dans toutes les cellules (corps + header) --- */
-[data-testid="stDataFrame"] div[role="rowgroup"] [role="gridcell"] *,
-[data-testid="stDataFrame"] div[role="rowgroup"] [role="columnheader"] * {
-  font-size: 1.1rem !important;   /* ajuste à ton goût */
-  line-height: 1.2;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
