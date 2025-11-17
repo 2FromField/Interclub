@@ -44,7 +44,7 @@ def check_pin(page_key: str, secret_path: str = "record_lock.pin"):
     if error_key not in st.session_state:
         st.session_state[error_key] = ""
 
-    st.title("🔐 Déverrouiller l'accès")
+    st.title("🔐 Code PIN:")
 
     # --- handlers ---
     def handle_digit(d):
@@ -64,16 +64,12 @@ def check_pin(page_key: str, secret_path: str = "record_lock.pin"):
                 st.session_state[error_key] = "Code incorrect"
                 st.session_state[pin_key] = ""
 
-    def handle_clear():
-        st.session_state[pin_key] = ""
-        st.session_state[error_key] = ""
-
     def handle_delete():
         cur = st.session_state[pin_key]
         st.session_state[pin_key] = cur[:-1]
 
     # --- 1) D'abord, les boutons (pour mettre à jour le state) ---
-    buttons = ["1", "0", "C", "⌫"]
+    buttons = ["1", "0", "⌫"]
 
     for label in buttons:
         if label in ("0", "1"):
@@ -81,9 +77,6 @@ def check_pin(page_key: str, secret_path: str = "record_lock.pin"):
                 label, key=f"{page_key}_btn_{label}", use_container_width=True
             ):
                 handle_digit(label)
-        elif label == "C":
-            if st.button("C", key=f"{page_key}_btn_clear", use_container_width=True):
-                handle_clear()
         elif label == "⌫":
             if st.button("⌫", key=f"{page_key}_btn_del", use_container_width=True):
                 handle_delete()
