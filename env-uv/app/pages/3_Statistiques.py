@@ -545,7 +545,7 @@ else:
                 alt.Chart(df_player)
                 .mark_line(point=True, interpolate="step-after")
                 .encode(
-                    x=alt.X("date:T", title="Date"),
+                    x=alt.X("date:T", title=None),
                     y=alt.Y(
                         "pts:Q",
                         scale=alt.Scale(domain=[300, 2000]),
@@ -554,7 +554,11 @@ else:
                     color=alt.Color(
                         "match_type_label:N",
                         scale=alt.Scale(domain=domain_base, range=range_base),
-                        title="Type de match",
+                        title=None,
+                        legend=alt.Legend(
+                            orient="bottom",  # position de la légende
+                            direction="horizontal",  # optionnel : horizontale
+                        ),
                     ),
                     tooltip=["date:T", "rank:N", "pts:Q"],
                 )
