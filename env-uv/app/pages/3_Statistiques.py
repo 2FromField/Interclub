@@ -3,6 +3,7 @@ import utils
 import altair as alt
 import sqlite3
 import pandas as pd
+from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="Statistiques", layout="wide")
 
@@ -125,7 +126,19 @@ m_ic["pts"] = join_if_two(p1_txt, p2_txt)
 
 # 5) Sélection finale
 result = m_ic[
-    ["type_match", "date", "division", "aob_team", "player", "rank", "pts"]
+    [
+        "id",
+        "type_match",
+        "date",
+        "division",
+        "aob_team",
+        "player",
+        "rank",
+        "pts",
+        "win",
+        "aob_grind",
+        "opponent_grind",
+    ]
 ].reset_index(drop=True)
 
 # Filtre d'équipe
@@ -161,7 +174,286 @@ if player_sel and player_sel != "-- Tous les joueurs --":
 #                       STATS JOUEUR                             #
 ##################################################################
 
-# # -- Graphique
+
+# -- KPI
+def calculating_grind(col, player_name):
+    cumul_grind_s, cumul_ungrind_s = 0, 0
+    cumul_grind_d, cumul_ungrind_d = 0, 0
+    cumul_grind_m, cumul_ungrind_m = 0, 0
+    for i in range(len(df)):
+        if "/" in df["player"][i]:
+            p1 = df["player"][i].split("/")[0]
+            p2 = df["player"][i].split("/")[1]
+            pts = (
+                df["aob_grind"][i].split("/")[0]
+                if player_name == p1
+                else df["aob_grind"][i].split("/")[1]
+            )
+            #
+            if df["type_match"][i] in ["DH", "DH1", "DH2", "DD1", "DD2"]:
+                if str(pts)[:1] == "-":
+                    cumul_ungrind_d += int(str(pts[1:]))
+                else:
+                    cumul_grind_d += int(pts)
+            else:
+                if str(pts)[:1] == "-":
+                    cumul_ungrind_m += int(str(pts)[1:])
+                else:
+                    cumul_grind_m += int(pts)
+        else:
+            pts = df["aob_grind"][i]
+            if str(pts)[:1] == "-":
+                cumul_ungrind_s += int(str(pts)[1:])
+            else:
+                cumul_grind_s += int(pts)
+    #
+    return (
+        cumul_grind_s,
+        cumul_ungrind_s,
+        cumul_grind_d,
+        cumul_ungrind_d,
+        cumul_grind_m,
+        cumul_ungrind_m,
+    )
+
+
+st.markdown(
+    """
+<style>
+.kpi-card{
+  background:#f1f3f5;           /* gris clair */
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px 14px;
+  text-align:center;
+  min-height:110px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  margin-bottom: 30px;
+}
+.kpi-title{
+  font-size:.85rem;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:#374151;                 /* gris foncé */
+  margin:0 0 6px 0;
+  opacity:.85;
+}
+.kpi-value{
+  font-size:2rem;                /* valeur bien visible */
+  font-weight:800;
+  margin:0;
+  color:#111827;
+}
+.kpi-sub{
+  font-size:.9rem;
+  color:#6b7280;
+  margin-top:4px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+def kpi_card(title, value, sub=None):
+    sub_html = f"<div class='kpi-sub'>{sub}</div>" if sub else ""
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+          <div class="kpi-title">{title}</div>
+          <div class="kpi-value">{value}</div>
+          {sub_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# --- 5 colonnes KPI ---
+player_name = st.session_state.get("dd_player_filter")
+if player_name != "-- Tous les joueurs --":
+    df_kpi = df.copy()
+    # -- Mise à jour des éléments visuels
+    c1, c2, c3, c4, c5 = st.columns(5, gap="small")
+    with c1:
+        kpi_card("Rencontres jouées", f'{df_kpi["id"].nunique()}', "saison 2025/26")
+    with c2:
+        kpi_card(
+            "Matchs joués",
+            f'{len(df_kpi[(df_kpi["type_match"].isin(["SH1","SH2","SH3","SH4","SD1","SD2"]))])} / {len(df_kpi[(df_kpi["type_match"].isin(["DH","DH1","DH2","DD"]))])} / {len(df_kpi[(df_kpi["type_match"].isin(["MX","MX1","MX2"]))])}',
+            "Simple / Double / Mixte",
+        )
+    with c3:
+        # Calcul du pourcentage de victoire selon le type de match
+        def safe_rate(wins: int, total: int, pct=True, ndigits=1):
+            if total == 0:
+                return "—" if pct else "0/0"  # à toi de choisir l’affichage
+            if pct:
+                return f"{round(100 * wins / total, ndigits)}%"
+            else:
+                return f"{wins}/{total}"
+
+        S_TYPES = {"SH1", "SH2", "SH3", "SH4", "SD1", "SD2"}
+        D_TYPES = {"DH", "DH1", "DH2", "DD", "DD1", "DD2"}
+        M_TYPES = {"MX", "MX1", "MX2"}
+
+        def group_rate(df, types):
+            sub = df[df["type_match"].isin(types)]
+            total = len(sub)
+            wins = (sub["win"].str.lower() == "aob").sum()
+            return safe_rate(wins, total, pct=True, ndigits=0)  # % sans décimal
+            # ou pct=False pour "wins/total"
+
+        s_rate = group_rate(df_kpi, S_TYPES)
+        d_rate = group_rate(df_kpi, D_TYPES)
+        m_rate = group_rate(df_kpi, M_TYPES)
+
+        kpi_text = f"{s_rate} / {d_rate} / {m_rate}"
+        kpi_card(
+            "Victoires",
+            f'{len(df_kpi[(df_kpi["type_match"].isin(["SH1","SH2","SH3","SH4","SD1","SD2"])) & (df_kpi["win"] == "aob")])} / {len(df_kpi[(df_kpi["type_match"].isin(["DH","DH1","DH2","DD", "DD1", "DD2"])) & (df_kpi["win"] == "aob")])} / {len(df_kpi[(df_kpi["type_match"].isin(["MX","MX1","MX2"])) & (df_kpi["win"] == "aob")])}',
+            f"{s_rate} / {d_rate} / {m_rate}",
+        )
+    with c4:
+        gs, us, gd, ud, gm, um = calculating_grind(df_kpi, player_name)
+        kpi_card(
+            "Points remportés",
+            f"{gs-us} / {gd-ud} / {gm-um}",
+            "Simple / Double / Mixte",
+        )
+    with c5:
+
+        def calculating_grind(col, player_name):
+            cumul_grind_s, cumul_ungrind_s = 0, 0
+            cumul_grind_d, cumul_ungrind_d = 0, 0
+            cumul_grind_m, cumul_ungrind_m = 0, 0
+            for i in range(len(df)):
+                if "/" in df["player"][i]:
+                    p1 = df["player"][i].split("/")[0]
+                    p2 = df["player"][i].split("/")[1]
+                    pts = (
+                        df["aob_grind"][i].split("/")[0]
+                        if player_name == p1
+                        else df["aob_grind"][i].split("/")[1]
+                    )
+                    #
+                    if df["type_match"][i] in ["DH", "DH1", "DH2", "DD"]:
+                        if pts[:1] == "-":
+                            cumul_ungrind_d += int(pts[1:])
+                        else:
+                            cumul_grind_d += int(pts)
+                    else:
+                        if pts[:1] == "-":
+                            cumul_ungrind_m += int(pts[1:])
+                        else:
+                            cumul_grind_m += int(pts)
+                else:
+                    pts = df["aob_grind"][i]
+                    if pts[:1] == "-":
+                        cumul_ungrind_s += int(pts[1:])
+                    else:
+                        cumul_grind_s += int(pts)
+            #
+            return (
+                cumul_grind_s,
+                cumul_ungrind_s,
+                cumul_grind_d,
+                cumul_ungrind_d,
+                cumul_grind_m,
+                cumul_ungrind_m,
+            )
+
+        REVERS_CLASSEMENTS = utils.CLASSEMENTS[::-1]
+
+        def best_ranks_lists(df: pd.DataFrame, player_name: str):
+            s = df.copy()
+            s["type_match"] = s["type_match"].astype(str).str.upper()
+            s["match_type"] = (
+                s["type_match"].str[0].map({"S": "Simple", "D": "Double", "M": "Mixte"})
+            )
+
+            def split2(col: pd.Series):
+                col = col.fillna("").astype(str)
+                parts = col.str.split("/", n=1, expand=True)
+                c1 = parts[0].str.strip()
+                c2 = parts[1].str.strip() if parts.shape[1] > 1 else ""
+                return c1, c2
+
+            p1, p2 = split2(s["player"])
+            r1, r2 = split2(s["rank"])
+
+            player = pd.Series("", index=s.index)
+            rank = pd.Series("", index=s.index)
+
+            mask1 = p1.eq(player_name)
+            player[mask1] = p1[mask1]
+            rank[mask1] = r1[mask1]
+
+            mask2 = p2.eq(player_name)
+            player[mask2] = p2[mask2]
+            rank[mask2] = r2[mask2]
+
+            unit = pd.DataFrame(
+                {
+                    "player": player,
+                    "rank": rank,
+                    "match_type": s["match_type"],
+                }
+            )
+
+            unit = unit[
+                (unit["player"] == player_name)
+                & (unit["rank"].isin(REVERS_CLASSEMENTS))
+            ].copy()
+
+            unit["rank"] = unit["rank"].astype(
+                pd.CategoricalDtype(REVERS_CLASSEMENTS, ordered=True)
+            )
+
+            best = unit.groupby(["player", "match_type"], as_index=False)["rank"].max()
+
+            list_simple = (
+                best.loc[best["match_type"] == "Simple", "rank"].astype(str).tolist()
+            )
+            list_double = (
+                best.loc[best["match_type"] == "Double", "rank"].astype(str).tolist()
+            )
+            list_mixte = (
+                best.loc[best["match_type"] == "Mixte", "rank"].astype(str).tolist()
+            )
+
+            # Si la liste est vide -> "..."
+            best_simple = list_simple[0] if len(list_simple) > 0 else "..."
+            best_double = list_double[0] if len(list_double) > 0 else "..."
+            best_mixte = list_mixte[0] if len(list_mixte) > 0 else "..."
+
+            return best_simple, best_double, best_mixte
+
+        player_best_rank = best_ranks_lists(df_kpi, player_name)
+        kpi_card(
+            "Meilleurs rangs",
+            f"{player_best_rank[0]} / {player_best_rank[1]} / {player_best_rank[2]}",
+            "Simple / Double / Mixte",
+        )
+    # st.dataframe(df_kpi)
+else:
+    st.info("Sélectionnez un joueur pour afficher ses statistiques d'interclub")
+    c1, c2, c3, c4, c5 = st.columns(5, gap="small")
+    with c1:
+        kpi_card("Rencontres jouées", "...", "saison 2025/26")
+    with c2:
+        kpi_card("Matchs joués", ".. / .. / ..", "Simple / Double / Mixte")
+    with c3:
+        kpi_card("Victoires", "...", "...%")
+    with c4:
+        kpi_card("Points remportés", "+...", "perdus: -...")
+    with c5:
+        kpi_card("Meilleurs rangs", ".. / .. / ..", "Simple / Double / Mixte")
+
+
+# -- Graphique
 # Si df est vide ou si la colonne 'player' n'existe pas, on sort proprement
 if df.empty or "player" not in df.columns:
     st.info("Aucune donnée à tracer.")
@@ -325,5 +617,3 @@ else:
                 color="independent", x="shared", y="shared"
             )
             st.altair_chart(chart, use_container_width=True)
-    else:
-        st.info("Sélectionnez un joueur pour afficher le graphique.")
