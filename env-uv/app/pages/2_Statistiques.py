@@ -4,11 +4,11 @@ import altair as alt
 import sqlite3
 import pandas as pd
 from streamlit_extras.stylable_container import stylable_container
-from auth import check_password
+from auth import check_pin
 import numpy as np
 
-# Vérification du password
-if not check_password():
+# 🔒 protéger cette page avec le PIN
+if not check_pin(page_key="record", secret_path="record_lock.pin"):
     st.stop()
 
 st.set_page_config(page_title="Statistiques", layout="wide")

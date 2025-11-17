@@ -4,12 +4,12 @@ from pathlib import Path
 from streamlit_extras.stylable_container import stylable_container
 import utils
 import pandas as pd
-from auth import check_password
+from auth import check_pin
 
 # Faire le calendrier des équipes
 
-# Vérification du password
-if not check_password():
+# 🔒 protéger cette page avec le PIN
+if not check_pin(page_key="record", secret_path="record_lock.pin"):
     st.stop()
 
 # -- Import des données
@@ -68,6 +68,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 def show_teams(path):
     html = f"""
         <div style="display:flex; justify-content:center; padding:8px; border-radius:12px; margin-bottom:30px">
@@ -87,4 +88,3 @@ with c2:
 with c3:
     st.markdown(show_teams("assets/img/D3.jpg"), unsafe_allow_html=True)
     st.markdown(show_teams("assets/img/V3.jpg"), unsafe_allow_html=True)
-
