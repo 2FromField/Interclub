@@ -6,8 +6,8 @@ from auth import check_pin
 
 # Vérification du password
 # 🔒 protéger cette page avec le PIN
-# if not check_pin(page_key="record", secret_path="record_lock.pin"):
-#     st.stop()
+if not check_pin(page_key="record", secret_path="record_lock.pin"):
+    st.stop()
 
 st.set_page_config(page_title="Historique", layout="wide")
 

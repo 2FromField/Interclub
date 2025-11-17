@@ -570,7 +570,7 @@ def match_name_histo(name, rank, side, opacity):
 
 # Gestionnaire de la colonne centrale d'affichage des sets du match
 def match_score_histo(set1, set2, set3=None):
-    if set3 is not None:
+    if set3 != "0/0":
         c1, c2, c3 = st.columns(3, gap="small")
         with c1:
             st.markdown(
@@ -621,7 +621,7 @@ def opacity_check(side, set1, set2, set3):
         ):
             return 1
         else:
-            return 0.6
+            return 0.4
     else:
         if int(set1.split("/")[0]) < int(set1.split("/")[1]) and int(
             set2.split("/")[0]
@@ -640,139 +640,20 @@ def opacity_check(side, set1, set2, set3):
         ):
             return 1
         else:
-            return 0.6
+            return 0.4
 
 
+# Gestion de l'opacité des visuels des vainqueurs/perdants
 def opacity_check_interclub(aob_score, opponent_score):
     if aob_score > opponent_score:
-        return 1, 0.6
+        return 1, 0.4
     elif aob_score == opponent_score:
         return 1, 1
     else:
-        return 0.6, 1
+        return 0.4, 1
 
 
-# Match remporté par AOB
-# def box_color_histo(
-#     date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
-# ):
-#     with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
-#         # Ligne principale
-#         c1, c2, c3, c4 = st.columns(4, gap="small")
-#         with c1:
-#             st.markdown(
-#                 f"<span style='font-size:1rem;opacity:0.6;float:left'>{journey}</span>",
-#                 unsafe_allow_html=True,
-#             )
-#             st.markdown(
-#                 f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:left; margin-top:-20px'>{aob_team}</span>",
-#                 unsafe_allow_html=True,
-#             )
-#         with c2:
-#             st.caption("")
-#             st.markdown(
-#                 f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[0]};float:right'>{aob_score}</span>",
-#                 unsafe_allow_html=True,
-#             )
-#         with c3:
-#             st.caption("")
-#             st.markdown(
-#                 f"<span style='font-size:3rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:left'>{opponent_score}</span>",
-#                 unsafe_allow_html=True,
-#             )
-#         with c4:
-#             st.markdown(
-#                 f"<span style='font-size:1rem;opacity:.6;float:right'>{date}</span>",
-#                 unsafe_allow_html=True,
-#             )
-#             st.markdown(
-#                 f"<span style='font-size:1.6rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]};float:right; margin-top:-20px'>{opponent_team}</span>",
-#                 unsafe_allow_html=True,
-#             )
-
-#         # Toggle détails (à droite)
-#         _left, _sp, _right = st.columns([6, 1, 1])
-#         with _left:
-#             show = st.toggle(
-#                 "Afficher les détails", key=f"details_{key_id}", value=False
-#             )
-
-#         # Détails : s'affichent seulement si activé (slide button)
-#         if show:
-#             TABLE_MATCHS = read_sheet("TABLE_MATCHS")
-#             TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
-#             df_filtered = TABLE_MATCHS[(TABLE_MATCHS["id"] == key_id)].reset_index(
-#                 drop=True
-#             )
-#             #
-#             for k in range(len(df_filtered)):
-#                 r1c1, r1c2, r1c3 = st.columns([4, 2, 4], gap="small")
-#                 with r1c1:
-#                     # Joueurs de l'AOB
-#                     if "/" in str(df_filtered["aob_player_id"].loc[k]):
-#                         p1_id = df_filtered["aob_player_id"].loc[k].split("/")[0]
-#                         p2_id = df_filtered["aob_player_id"].loc[k].split("/")[1]
-#                         #
-#                         p1_name = (
-#                             TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p1_id)]
-#                             .reset_index(drop=True)["name"]
-#                             .loc[0]
-#                         )
-#                         p2_name = (
-#                             TABLE_PLAYERS[TABLE_PLAYERS["id_player"] == int(p2_id)]
-#                             .reset_index(drop=True)["name"]
-#                             .loc[0]
-#                         )
-#                         match_name_histo(
-#                             f"{p1_name}/{p2_name}",
-#                             df_filtered["aob_rank"].loc[k],
-#                             "left",
-#                             opacity_check(
-#                                 "aob",
-#                                 df_filtered["set1"].loc[k],
-#                                 df_filtered["set2"].loc[k],
-#                                 df_filtered["set3"].loc[k],
-#                             ),
-#                         )
-#                     else:
-#                         match_name_histo(
-#                             TABLE_PLAYERS[
-#                                 TABLE_PLAYERS["id_player"]
-#                                 == df_filtered["aob_player_id"].loc[k]
-#                             ]
-#                             .reset_index(drop=True)["name"]
-#                             .loc[0],
-#                             df_filtered["aob_rank"].loc[k],
-#                             "left",
-#                             opacity_check(
-#                                 "aob",
-#                                 df_filtered["set1"].loc[k],
-#                                 df_filtered["set2"].loc[k],
-#                                 df_filtered["set3"].loc[k],
-#                             ),
-#                         )
-#                 with r1c2:
-#                     # Scores des différents sets
-#                     match_score_histo(
-#                         df_filtered["set1"].loc[k],
-#                         df_filtered["set2"].loc[k],
-#                         df_filtered["set3"].loc[k],
-#                     )
-#                 with r1c3:
-#                     # Joueurs de l'extérieur
-#                     match_name_histo(
-#                         df_filtered["opponent_player"].loc[k],
-#                         df_filtered["opponent_rank"].loc[k],
-#                         "right",
-#                         opacity_check(
-#                             "opponent",
-#                             df_filtered["set1"].loc[k],
-#                             df_filtered["set2"].loc[k],
-#                             df_filtered["set3"].loc[k],
-#                         ),
-#                     )
-
-
+# Lignes de la page "Historique"
 def box_color_histo(
     date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
 ):
