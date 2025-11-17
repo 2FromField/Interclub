@@ -79,12 +79,12 @@ def show_teams(path):
 
 c1, c2, c3 = st.columns(3, gap="small")
 with c1:
-    st.markdown(show_teams("assets/calendar/PR.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/calendar/D5.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/PR.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/D5.jpg"), unsafe_allow_html=True)
 with c2:
-    st.markdown(show_teams("assets/calendar/D2.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/calendar/H2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/D2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/H2.jpg"), unsafe_allow_html=True)
 with c3:
-    st.markdown(show_teams("assets/calendar/D3.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/calendar/V3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/D3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("assets/img/V3.jpg"), unsafe_allow_html=True)
 
