@@ -4,6 +4,11 @@ from pathlib import Path
 from streamlit_extras.stylable_container import stylable_container
 import utils
 import pandas as pd
+from auth import check_password
+
+# Vérification du password
+if not check_password():
+    st.stop()
 
 # -- Import des données
 TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
@@ -50,8 +55,6 @@ def match_output(team):
 
 st.set_page_config(page_title="Accueil", layout="wide")
 
-# t1, t2 = st.columns([1, 5])
-# with t1:
 html = f"""
 <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
 {img_to_html("assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
@@ -62,11 +65,6 @@ st.markdown(
     f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON 2025/26</div>",
     unsafe_allow_html=True,
 )
-# with t2:
-#     st.markdown(
-#         f"<div style='font-size:10rem; text-align:center'>SAISON 2025/26</div>",
-#         unsafe_allow_html=True,
-#     )
 
 # Affichage des statistiques du club
 df = pd.DataFrame(

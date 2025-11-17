@@ -1,6 +1,11 @@
 from datetime import date
 import streamlit as st
 import utils
+from auth import check_password
+
+# Vérification du password
+if not check_password():
+    st.stop()
 
 # --- Configuration de la page
 st.set_page_config(page_title="Record", page_icon="🗂️", layout="wide")

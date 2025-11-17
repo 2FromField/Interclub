@@ -2,6 +2,11 @@ import streamlit as st
 from streamlit_extras.stylable_container import stylable_container
 import pandas as pd
 import utils
+from auth import check_password
+
+# Vérification du password
+if not check_password():
+    st.stop()
 
 st.set_page_config(page_title="Historique", layout="wide")
 

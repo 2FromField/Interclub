@@ -4,6 +4,11 @@ import altair as alt
 import sqlite3
 import pandas as pd
 from streamlit_extras.stylable_container import stylable_container
+from auth import check_password
+
+# Vérification du password
+if not check_password():
+    st.stop()
 
 st.set_page_config(page_title="Statistiques", layout="wide")
 
