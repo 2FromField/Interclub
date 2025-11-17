@@ -61,7 +61,7 @@ def check_record_password(page_key: str, secret_path: str):
         return True
 
     # sinon, afficher le formulaire
-    st.title("🔐 Accès réservé")
+    st.title("🔐 Accès réservé aux administrateurs")
     st.text_input(
         "Mot de passe",
         type="password",
