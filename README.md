@@ -1,5 +1,13 @@
 # Interclub AOB — App Streamlit (Google Sheets + Streamlit Community Cloud)
 
+---
+
+![Streamlit](https://img.shields.io/badge/Kubernetes-3069DE?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
+![Google Sheet](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white)
+
+---
+
 Une application Streamlit pour :
 
 - Enregistrer les rencontres d’interclubs (formulaires dynamiques par catégorie),
