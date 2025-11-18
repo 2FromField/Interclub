@@ -3,24 +3,27 @@ import streamlit as st
 import utils
 from auth import check_record_password
 
-# Vérification du password
+# 🔒 Accès administrateur
 if not check_record_password(page_key="admin", secret_path="admin.password"):
     st.stop()
 
-# --- Configuration de la page
-st.set_page_config(page_title="Record", page_icon="🗂️", layout="wide")
+##################################################################
+#                          DONNEES                               #
+##################################################################
 
-# Accès aux données
+# --- Accès aux tables
+INTERCLUB_TABLE = utils.read_sheet("TABLE_INTERCLUB")
+MATCHS_TABLE = utils.read_sheet("TABLE_MATCHS")
+PLAYERS_TABLE = utils.read_sheet("TABLE_PLAYERS")
+
+# --- Données brutes
+EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]
+EQUIPE_NOMS = ["AOB35-1", "AOB35-2", "AOB35-3", "AOB35-4"]
 
 
-# Flash message après rerun
-flash = st.session_state.pop("flash", None)
-if flash:
-    level, text = flash
-    getattr(st, level)(text)
-
-
-# --- Fonctions utilitaires
+##################################################################
+#                         FONCTIONS                              #
+##################################################################
 def winner(set1: str, set2: str, set3: str) -> None:
     """Déterminer l'équipe victorieuse de la rencontre"""
     winner_team = None
@@ -50,25 +53,28 @@ def winner(set1: str, set2: str, set3: str) -> None:
     return winner_team
 
 
-# --- Accès aux tables
-INTERCLUB_TABLE = utils.read_sheet("TABLE_INTERCLUB")
-MATCHS_TABLE = utils.read_sheet("TABLE_MATCHS")
-PLAYERS_TABLE = utils.read_sheet("TABLE_PLAYERS")
-
-# --- Données brutes
-EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]
-EQUIPE_NOMS = ["AOB35-1", "AOB35-2", "AOB35-3", "AOB35-4"]
-
-
-# --- Formulaire
 def reset_sh1():
+    """Reset du dropdown lors de la désélection"""
     # optionnel : oublie la sélection dépendante si la catégorie change
     st.session_state.pop("sh1_player_home", None)
 
 
+##################################################################
+#                           LAYOUT                               #
+##################################################################
+st.set_page_config(page_title="Record", page_icon="🗂️", layout="wide")
+
+# Flash message après rerun
+flash = st.session_state.pop("flash", None)
+if flash:
+    level, text = flash
+    getattr(st, level)(text)
+
+
+# -- Dropdown des différentes division de l'AOB
 categorie = st.selectbox("Catégorie", EQUIPE, key="categorie", on_change=reset_sh1)
 
-# Formulaire
+# -- Formulaire
 with st.form("match_record"):
     col2, col3 = st.columns(2)
     with col2:
@@ -197,7 +203,7 @@ with st.form("match_record"):
 
     submitted = st.form_submit_button("Enregistrer")
 
-# Enregistrement
+# -- Sauvegarde des données enregistrées sur Google SHEET
 if submitted:
     if not opponent_team.strip():  # oublie nom d'équipe adverse
         st.error("Veuillez renseigner le champ **Adversaire**.")
