@@ -545,7 +545,7 @@ if df.empty or "player" not in df.columns:
     st.info("Aucune donnée à tracer.")
 else:
     # Dates
-    df["date"] = pd.to_datetime(df["date"], dayfirst=True, errors="coerce")
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d", errors="coerce")
 
     # --- match_type à partir de type_match: SH/SD -> S, DH/DD -> D, MX -> M ---
     # si ta colonne s'appelle déjà "match_type", commente ces 2 lignes
