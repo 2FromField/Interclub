@@ -1,12 +1,6 @@
 import streamlit as st
 import pandas as pd
 import utils
-from auth import check_pin
-
-# 🔒 protéger cette page avec le PIN
-if not check_pin(page_key="record", secret_path="record_lock.pin"):
-    st.stop()
-
 
 ##################################################################
 #                        VARIABLES                               #

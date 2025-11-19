@@ -4,13 +4,7 @@ import altair as alt
 import sqlite3
 import pandas as pd
 from streamlit_extras.stylable_container import stylable_container
-from auth import check_pin
 import numpy as np
-
-# 🔒 protéger cette page avec le PIN
-if not check_pin(page_key="record", secret_path="record_lock.pin"):
-    st.stop()
-
 
 ##################################################################
 #                          DONNEES                               #
