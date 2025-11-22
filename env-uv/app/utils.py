@@ -6,11 +6,17 @@ import gspread
 from google.oauth2.service_account import Credentials
 import datetime as dt
 import yaml
+from pathlib import Path
 
 # -- Définition de l'environnement
-with open("config.yaml", "r") as f:
-    cfg = yaml.safe_load(f)
-env = cfg["env"]  # "dev" ou "prod"
+BASE_DIR = Path(__file__).resolve().parent  # /.../app
+PROJECT_ROOT = BASE_DIR.parent  # /.../ (un niveau au-dessus)
+CONFIG_PATH = PROJECT_ROOT / "config.yaml"  # /.../config.yaml
+
+with open(CONFIG_PATH, "r") as f:
+    config = yaml.safe_load(f)
+env = config["env"]  # "dev" ou "prod"
+
 
 # --- Accès aux google sheets
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
