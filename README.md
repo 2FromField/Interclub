@@ -60,10 +60,12 @@ Une application Streamlit pour :
 │   │   ├── 🐍 1_Historique.py
 │   │   ├── 🐍 2_Statistiques.py
 │   │   └── 🐍 3_Record.py
+│   │   └── 🐍 4_Tournoi.py
 │   ├── 🐍 app.py
 │   ├── 🐍 auth.py
 │   └── 🐍 utils.py
 ├── ⚙️ .gitignore
+├── ⚙️ config.yaml
 ├── 📝 README.md
 ├── 🐍 main.py
 ├── ⚙️ pyproject.toml
@@ -94,9 +96,12 @@ Astuce : si vous utilisez uv localement, conservez aussi requirements.txt pour S
 En local, créez `.streamlit/secrets.toml` pour y stocker vos données sensibles (comme ci-joint):
 
 ```
+[prod]
 SHEET_ID = "<votre_sheet_id>"
-[record_lock]
-pin = "your-pin"
+[dev]
+TABLE_INTERCLUB = "path/to/interclub.csv"
+TABLE_MATCHS = "path/to/matchs.csv"
+TABLE_PLAYERS = "path/to/players.csv"
 [admin]
 password = "admin-password"
 [gcp]
