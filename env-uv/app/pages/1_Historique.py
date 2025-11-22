@@ -14,7 +14,7 @@ EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]
 @st.cache_data(ttl=30)  # Cache limitant la lecture
 def load_interclub_table():
     """Chargement cacheté de la table 'INTERCLUB' hébergée sur un Google SHEET"""
-    return utils.read_sheet("TABLE_INTERCLUB")
+    return utils.TABLE_INTERCLUB
 
 
 def filter_by_result(
@@ -52,7 +52,6 @@ def filter_by_result(
 ##################################################################
 st.set_page_config(page_title="Historique", layout="wide")
 
-
 c1, c2, c3 = st.columns([3, 1, 1], gap="small")
 with c1:
     # -- Dropdown de filtrage d'équipe
@@ -61,7 +60,7 @@ with c2:
     # -- Dropdown des journées
     day = st.multiselect(
         "Journée(s)",
-        list(utils.read_sheet("TABLE_INTERCLUB")["journey"].unique()),
+        list(utils.TABLE_INTERCLUB["journey"].unique()),
         key="day",
     )
 with c3:
@@ -87,7 +86,7 @@ if day:
 
 # -- Filtre basé sur l'issue des rencontres
 if result:
-    df = filter_by_result(utils.read_sheet("TABLE_INTERCLUB"), result)
+    df = filter_by_result(utils.TABLE_INTERCLUB, result)
 
 # -- Affichage du nombre de match trouvés en fonctions des filtres
 st.caption(f"{len(df)} matchs trouvés")

@@ -11,7 +11,7 @@ import numpy as np
 ##################################################################
 
 # Import des tables
-TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
+TABLE_INTERCLUB = utils.TABLE_INTERCLUB
 
 # Types de match
 S_TYPES = {"SH1", "SH2", "SH3", "SH4", "SD1", "SD2"}

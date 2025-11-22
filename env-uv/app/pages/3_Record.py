@@ -12,9 +12,9 @@ if not check_record_password(page_key="admin", secret_path="admin.password"):
 ##################################################################
 
 # --- Accès aux tables
-INTERCLUB_TABLE = utils.read_sheet("TABLE_INTERCLUB")
-MATCHS_TABLE = utils.read_sheet("TABLE_MATCHS")
-PLAYERS_TABLE = utils.read_sheet("TABLE_PLAYERS")
+INTERCLUB_TABLE = utils.TABLE_INTERCLUB
+MATCHS_TABLE = utils.TABLE_MATCHS
+PLAYERS_TABLE = utils.TABLE_PLAYERS
 
 # --- Données brutes
 EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]

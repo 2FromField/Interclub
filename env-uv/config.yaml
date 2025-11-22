@@ -1,0 +1,22 @@
+env: "prod" # ("dev", "prod")
+
+common:
+  project_name: "interclub"
+
+dev:
+  # data:
+  #   TABLE_INTERCLUB: "data/transactions.csv"
+  #   sample_fraction: 0.1
+  # model:
+  #   params:
+  #     n_estimators: 50
+  #     max_depth: 3
+
+prod:
+  # data:
+  #   input_path: "s3://my-bucket/prod/transactions.csv"
+  #   sample_fraction: 1.0
+  # model:
+  #   params:
+  #     n_estimators: 300
+  #     max_depth: 7

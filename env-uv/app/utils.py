@@ -5,6 +5,12 @@ from streamlit_extras.stylable_container import stylable_container
 import gspread
 from google.oauth2.service_account import Credentials
 import datetime as dt
+import yaml
+
+# -- Définition de l'environnement
+with open("config.yaml", "r") as f:
+    cfg = yaml.safe_load(f)
+env = cfg["env"]  # "dev" ou "prod"
 
 # --- Accès aux google sheets
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -26,10 +32,10 @@ def _ws(sheet_id: str, worksheet: str):
         return sh.add_worksheet(title=worksheet, rows=1000, cols=26)
 
 
-def read_sheet(worksheet="Feuille1") -> pd.DataFrame:
-    ws = _ws(st.secrets["SHEET_ID"], worksheet)
-    rows = ws.get_all_records()  # suppose la 1re ligne = en-têtes
-    return pd.DataFrame(rows)
+# def read_sheet(worksheet="Feuille1") -> pd.DataFrame:
+#     ws = _ws(st.secrets["SHEET_ID"], worksheet)
+#     rows = ws.get_all_records()  # suppose la 1re ligne = en-têtes
+#     return pd.DataFrame(rows)
 
 
 def to_native(v):
@@ -59,10 +65,33 @@ def append_row_sheet(row: dict, worksheet="Feuille1"):
     ws.append_row(values, value_input_option="USER_ENTERED")
 
 
+@st.cache_data
+def load_table(env: str, table: str) -> pd.DataFrame:
+    """Chargement des données dev/prod, mis en cache par Streamlit."""
+    if env == "prod":
+        # SHEET_ID vient de .streamlit/secrets.toml, section [prod]
+        sheet_id = st.secrets["prod"]["SHEET_ID"]
+
+        # à adapter : ici tu utilises _ws pour récupérer la worksheet
+        ws = _ws(sheet_id, table)  # ou autre nom d’onglet
+        rows = ws.get_all_records()  # suppose 1re ligne = en-têtes
+        df = pd.DataFrame(rows)
+
+    elif env == "dev":
+        # TABLE_INTERCLUB / TABLE_MATCHS / TABLE_PLAYERS viennent de [dev]
+        paths = st.secrets["dev"]
+        df = pd.read_csv(paths[table], sep=";")
+
+    else:
+        raise ValueError(f"Environnement inconnu : {env}")
+
+    return df
+
+
 # -- Téléchargement des données
-TABLE_INTERCLUB = read_sheet("TABLE_INTERCLUB")
-TABLE_MATCHS = read_sheet("TABLE_MATCHS")
-TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
+TABLE_INTERCLUB = load_table(env, "TABLE_INTERCLUB")
+TABLE_MATCHS = load_table(env, "TABLE_MATCHS")
+TABLE_PLAYERS = load_table(env, "TABLE_PLAYERS")
 
 # Données brutes
 CLASSEMENTS = [
@@ -696,8 +725,8 @@ def box_color_histo(
 
         # Détails : s'affichent seulement si activé (slide button)
         if show:
-            TABLE_MATCHS = read_sheet("TABLE_MATCHS")
-            TABLE_PLAYERS = read_sheet("TABLE_PLAYERS")
+            TABLE_MATCHS = TABLE_MATCHS
+            TABLE_PLAYERS = TABLE_PLAYERS
             df_filtered = TABLE_MATCHS[(TABLE_MATCHS["id"] == key_id)].reset_index(
                 drop=True
             )

@@ -6,7 +6,7 @@ import utils
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
-TABLE_INTERCLUB = utils.read_sheet("TABLE_INTERCLUB")
+TABLE_INTERCLUB = utils.load_table(utils.env, "TABLE_INTERCLUB")
 
 ##################################################################
 #                         FONCTIONS                              #
