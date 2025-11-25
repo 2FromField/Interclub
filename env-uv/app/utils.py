@@ -60,7 +60,7 @@ def to_native(v):
 
 
 def append_row_sheet(row: dict, worksheet="Feuille1"):
-    ws = _ws(st.secrets["SHEET_ID"], worksheet)
+    ws = _ws(st.secrets["prod"]["SHEET_ID"], worksheet)
     headers = ws.row_values(1)
     if not headers:
         headers = list(row.keys())
