@@ -214,8 +214,10 @@ if submitted:
                 sh1_row = {
                     "id": MATCHS_TABLE["id"].max() + 1,
                     "type_match": "SH1",
-                    "aob_player_id": utils.get_player_id(
-                        PLAYERS_TABLE, st.session_state.get("sh1_aob_name")
+                    "aob_player_id": str(
+                        utils.get_player_id(
+                            PLAYERS_TABLE, st.session_state.get("sh1_aob_name")
+                        )
                     ),
                     "opponent_player": st.session_state.get("sh1_opponent_name"),
                     "aob_rank": st.session_state.get("sh1_aob_rank"),
@@ -237,8 +239,10 @@ if submitted:
                 sh2_row = {
                     "id": MATCHS_TABLE["id"].max() + 1,
                     "type_match": "SH2",
-                    "aob_player_id": utils.get_player_id(
-                        PLAYERS_TABLE, st.session_state.get("sh2_aob_name")
+                    "aob_player_id": str(
+                        utils.get_player_id(
+                            PLAYERS_TABLE, st.session_state.get("sh2_aob_name")
+                        )
                     ),
                     "opponent_player": st.session_state.get("sh2_opponent_name"),
                     "aob_rank": st.session_state.get("sh2_aob_rank"),
@@ -260,8 +264,10 @@ if submitted:
                 sh3_row = {
                     "id": MATCHS_TABLE["id"].max() + 1,
                     "type_match": "SH3",
-                    "aob_player_id": utils.get_player_id(
-                        PLAYERS_TABLE, st.session_state.get("sh3_aob_name")
+                    "aob_player_id": str(
+                        utils.get_player_id(
+                            PLAYERS_TABLE, st.session_state.get("sh3_aob_name")
+                        )
                     ),
                     "opponent_player": st.session_state.get("sh3_opponent_name"),
                     "aob_rank": st.session_state.get("sh3_aob_rank"),
@@ -283,8 +289,10 @@ if submitted:
                 sh4_row = {
                     "id": MATCHS_TABLE["id"].max() + 1,
                     "type_match": "SH4",
-                    "aob_player_id": utils.get_player_id(
-                        PLAYERS_TABLE, st.session_state.get("sh4_aob_name")
+                    "aob_player_id": str(
+                        utils.get_player_id(
+                            PLAYERS_TABLE, st.session_state.get("sh4_aob_name")
+                        )
                     ),
                     "opponent_player": st.session_state.get("sh4_opponent_name"),
                     "aob_rank": st.session_state.get("sh4_aob_rank"),
@@ -898,32 +906,33 @@ if submitted:
                     ]
                 )
                 #
-                row_interclub = {
-                    # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
-                    "id": len(INTERCLUB_TABLE) + 1,
-                    "date": str(date_match),
-                    "journey": f"J{journey}",
-                    "division": categorie,
-                    "aob_team": aob_team,
-                    "opponent_team": opponent_team,
-                    "aob_score": match_df["win"].fillna("").str.count("aob").sum(),
-                    "opponent_score": match_df["win"]
-                    .fillna("")
-                    .str.count("opponent")
-                    .sum(),
-                }
-                # Mise à jour de la table INTERCLUB
-                try:
-                    utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
-                    st.session_state["flash"] = (
-                        "success",
-                        "✅ Mise à jour de la table INTERCLUB effectuée !",
-                    )
-                except Exception as e:
-                    st.session_state["flash"] = (
-                        "error",
-                        f"❌ Impossible de mettre à jour la table INTERCLUB : {e}",
-                    )
+            # Enregistrement de la row interclub
+            row_interclub = {
+                # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
+                "id": len(INTERCLUB_TABLE) + 1,
+                "date": str(date_match),
+                "journey": f"J{journey}",
+                "division": categorie,
+                "aob_team": aob_team,
+                "opponent_team": opponent_team,
+                "aob_score": match_df["win"].fillna("").str.count("aob").sum(),
+                "opponent_score": match_df["win"]
+                .fillna("")
+                .str.count("opponent")
+                .sum(),
+            }
+            # Mise à jour de la table INTERCLUB
+            try:
+                utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
+                st.session_state["flash"] = (
+                    "success",
+                    "✅ Mise à jour de la table INTERCLUB effectuée !",
+                )
+            except Exception as e:
+                st.session_state["flash"] = (
+                    "error",
+                    f"❌ Impossible de mettre à jour la table INTERCLUB : {e}",
+                )
                 st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
                 st.rerun()
         except Exception as e:
