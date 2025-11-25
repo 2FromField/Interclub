@@ -922,18 +922,8 @@ if submitted:
                 .sum(),
             }
             # Mise à jour de la table INTERCLUB
-            try:
-                utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
-                st.session_state["flash"] = (
-                    "success",
-                    "✅ Mise à jour de la table INTERCLUB effectuée !",
-                )
-            except Exception as e:
-                st.session_state["flash"] = (
-                    "error",
-                    f"❌ Impossible de mettre à jour la table INTERCLUB : {e}",
-                )
-                st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
-                st.rerun()
+            utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
+            st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
+            st.rerun()
         except Exception as e:
             st.session_state["flash"] = ("error", f"❌ Impossible d'enregistrer : {e}")
