@@ -365,9 +365,6 @@ if submitted:
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row]
                 )
-                #
-                st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
-                st.rerun()
             #
             elif categorie == "D5":
                 sh1_row = {
@@ -542,9 +539,6 @@ if submitted:
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row]
                 )
-                #
-                st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
-                st.rerun()
             #
             elif categorie == "V3":
                 sh1_row = {
@@ -693,9 +687,6 @@ if submitted:
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row]
                 )
-                #
-                st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
-                st.rerun()
             #
             else:
                 sh1_row = {
@@ -906,7 +897,7 @@ if submitted:
                     ]
                 )
                 #
-            # Enregistrement de la row interclub
+            # Mise à jour de la table INTERCLUB
             row_interclub = {
                 # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
                 "id": len(INTERCLUB_TABLE) + 1,
@@ -924,6 +915,9 @@ if submitted:
             # Mise à jour de la table INTERCLUB
             utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
             st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
-            st.rerun()
+            #
         except Exception as e:
-            st.session_state["flash"] = ("error", f"❌ Impossible d'enregistrer : {e}")
+            st.session_state["flash"] = (
+                "error",
+                f"❌ Impossible d'enregistrer la rencontre : {e}",
+            )
