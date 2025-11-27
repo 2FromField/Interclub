@@ -173,16 +173,23 @@ def best_ranks_lists(df: pd.DataFrame, player_name: str):
     )
 
     def split2(col: pd.Series):
-        """Séparer les strings concaténés par un '/' en deux variables uniques."""
         col = col.fillna("").astype(str)
         parts = col.str.split("/", n=1, expand=True)
+
         c1 = parts[0].str.strip()
-        c2 = parts[1].str.strip() if parts.shape[1] > 1 else ""
+        # get la deuxième colonne si elle existe, sinon valeurs NaN -> remplacées par ""
+        c2 = (
+            parts[1].fillna("").str.strip()
+            if parts.shape[1] > 1
+            else pd.Series("", index=col.index)
+        )
+
         return c1, c2
 
     # Variables
     p1, p2 = split2(s["player"])
     r1, r2 = split2(s["rank"])
+    print(p1, p2)
 
     player = pd.Series("", index=s.index)
     rank = pd.Series("", index=s.index)
