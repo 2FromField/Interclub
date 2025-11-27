@@ -731,8 +731,6 @@ def box_color_histo(
 
         # Détails : s'affichent seulement si activé (slide button)
         if show:
-            TABLE_MATCHS = TABLE_MATCHS
-            TABLE_PLAYERS = TABLE_PLAYERS
             df_filtered = TABLE_MATCHS[(TABLE_MATCHS["id"] == key_id)].reset_index(
                 drop=True
             )
