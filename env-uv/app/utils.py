@@ -722,28 +722,29 @@ def box_color_histo(
         c1, c2 = st.columns([1, 9], gap="small")
         with c1:
             st.markdown(
-                f"<span style='font-size:1rem;opacity:0.6'>{journey}</span>",
+                f"<div style='font-size:1rem;opacity:0.6'>{journey}</div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; text-align: center; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_score}</span></div>",
+                f"<div style='margin-bottom: 5px; background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); text-align:center;'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_score}</span></div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]})'><span style='font-size:1rem; text-align: center; opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_score}</span></div>",
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]}); text-align:center;'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_score}</span></div>",
                 unsafe_allow_html=True,
             )
+
         with c2:
             st.markdown(
-                f"<span style='font-size:1rem; opacity:.6; float:right'>{date}</span>",
+                f"<div style='font-size:1rem; opacity:.6; text-align:right;'>{date}</div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_team}</span></div>",
+                f"<div style='margin-bottom: 5px; background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]});'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_team}</span></div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]})'><span style='font-size:1rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_team}</span></div>",
+                f"<div style='margin-bottom:10px; background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]});'><span style='font-size:1rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_team}</span></div>",
                 unsafe_allow_html=True,
             )
 
@@ -751,7 +752,9 @@ def box_color_histo(
         _left, _sp, _right = st.columns([6, 1, 1])
         with _left:
             show = st.toggle(
-                "Afficher les détails", key=f"details_{key_id}", value=False
+                "Afficher les détails",
+                key=f"details_{key_id}",
+                value=False,
             )
 
         # Détails : s'affichent seulement si activé (slide button)
