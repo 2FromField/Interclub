@@ -59,18 +59,6 @@ def to_native(v):
     return v
 
 
-def append_row_sheet(row: dict, worksheet="Feuille1"):
-    ws = _ws(st.secrets["prod"]["SHEET_ID"], worksheet)
-    headers = ws.row_values(1)
-    if not headers:
-        headers = list(row.keys())
-        ws.update("A1", [headers])
-
-    # -> convertit chaque valeur en type natif
-    values = [to_native(row.get(h, "")) for h in headers]
-    ws.append_row(values, value_input_option="USER_ENTERED")
-
-
 @st.cache_data
 def load_table(env: str, table: str) -> pd.DataFrame:
     """Chargement des données dev/prod, mis en cache par Streamlit."""
@@ -98,6 +86,43 @@ def load_table(env: str, table: str) -> pd.DataFrame:
 TABLE_INTERCLUB = load_table(env, "TABLE_INTERCLUB")
 TABLE_MATCHS = load_table(env, "TABLE_MATCHS")
 TABLE_PLAYERS = load_table(env, "TABLE_PLAYERS")
+
+
+def append_row_sheet(row: dict, worksheet="Feuille1"):
+    append_rows_sheet([row], worksheet)
+
+
+def append_rows_sheet(rows: list[dict], worksheet="Feuille1"):
+    global TABLE_INTERCLUB, TABLE_MATCHS, TABLE_PLAYERS
+
+    if not rows:
+        return
+
+    ws = _ws(st.secrets["prod"]["SHEET_ID"], worksheet)
+
+    # Récupérer / créer les headers
+    headers = ws.row_values(1)
+    if not headers:
+        # on prend les clés du premier dict comme référence
+        headers = list(rows[0].keys())
+        ws.update("A1", [headers])
+
+    # Construire la matrice de valeurs dans l'ordre des headers
+    values_matrix = []
+    for row in rows:
+        values_matrix.append([to_native(row.get(h, "")) for h in headers])
+
+    # Append en une seule fois
+    ws.append_rows(values_matrix, value_input_option="USER_ENTERED")
+
+    # 🔁 on recharge les données après l’écriture
+    TABLE_INTERCLUB = load_table(env, "TABLE_INTERCLUB")
+    TABLE_MATCHS = load_table(env, "TABLE_MATCHS")
+    TABLE_PLAYERS = load_table(env, "TABLE_PLAYERS")
+
+    # 🧹 On invalide tous les caches de données Streamlit
+    st.cache_data.clear()
+
 
 # Données brutes
 CLASSEMENTS = [

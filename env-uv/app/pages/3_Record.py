@@ -355,12 +355,10 @@ if submitted:
                 #
                 # Ajouter les nouvelles lignes
                 # append_row("data/matchs.csv", sh1_row)
-                utils.append_row_sheet(sh1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh2_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh3_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh4_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dh1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dh2_row, "TABLE_MATCHS")
+                utils.append_rows_sheet(
+                    [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row],
+                    "TABLE_MATCHS",
+                )
                 #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row]
@@ -528,13 +526,10 @@ if submitted:
                 #
                 # Ajouter les nouvelles lignes
                 # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_row_sheet(sh1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh2_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sd1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dh_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dd_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx2_row, "TABLE_MATCHS")
+                utils.append_rows_sheet(
+                    [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row],
+                    "TABLE_MATCHS",
+                )
                 #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row]
@@ -677,12 +672,10 @@ if submitted:
                 #
                 # Ajouter les nouvelles lignes
                 # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_row_sheet(sh1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh2_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dh_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dd_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx2_row, "TABLE_MATCHS")
+                utils.append_rows_sheet(
+                    [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row],
+                    "TABLE_MATCHS",
+                )
                 #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row]
@@ -875,14 +868,19 @@ if submitted:
                 #
                 # Ajouter les nouvelles lignes
                 # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_row_sheet(sh1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sh2_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sd1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(sd2_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dh_row, "TABLE_MATCHS")
-                utils.append_row_sheet(dd_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx1_row, "TABLE_MATCHS")
-                utils.append_row_sheet(mx2_row, "TABLE_MATCHS")
+                utils.append_rows_sheet(
+                    [
+                        sh1_row,
+                        sh2_row,
+                        sd1_row,
+                        sd2_row,
+                        dh_row,
+                        dd_row,
+                        mx1_row,
+                        mx2_row,
+                    ],
+                    "TABLE_MATCHS",
+                )
                 #
                 match_df = utils.create_df_from_dict(
                     [
