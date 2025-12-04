@@ -669,48 +669,64 @@ else:
             lines_df = pd.DataFrame(thresholds)
 
             # Assure que l’échelle Y inclut tous les seuils
-            y_min = min(df_player["pts"].min(), lines_df["y"].min())
-            y_max = max(df_player["pts"].max(), lines_df["y"].max())
-            base = base.encode(
-                y=alt.Y(
-                    "pts:Q",
-                    title="Points de classement",
-                    scale=alt.Scale(domain=[y_min, y_max]),
-                )
-            )
+            pts_min = df_player["pts"].min()
+            pts_max = df_player["pts"].max()
+            margin = 100  # marge autour des points
 
-            # 3) Règles horizontales (une par ligne du DF)
-            rules = (
-                alt.Chart(lines_df)
-                .mark_rule(strokeDash=[4, 4], strokeWidth=2)
-                .encode(
-                    y="y:Q",
-                    color=alt.Color(
-                        "label:N",
-                        scale=alt.Scale(range=lines_df["color"].tolist()),
-                        legend=None,
-                    ),
-                )
-            )
+            if pd.notna(pts_min) and pd.notna(pts_max):
+                y_min = max(0, pts_min - margin)
+                y_max = pts_max + margin
 
-            # 4) Labels à droite (x = date max)
-            x_max = df_player["date"].max()
-            labels = (
-                alt.Chart(lines_df.assign(x=x_max))
-                .mark_text(align="left", dx=6, dy=-6, fontWeight="bold")
-                .encode(
-                    x="x:T",
-                    y="y:Q",
-                    text="label:N",
-                    color=alt.Color(
-                        "label:N",
-                        scale=alt.Scale(range=lines_df["color"].tolist()),
-                        legend=None,
-                    ),
-                )
-            )
+                # 2) Filtrer les seuils visibles dans cette fenêtre
+                lines_df_zoom = lines_df[
+                    (lines_df["y"] >= y_min) & (lines_df["y"] <= y_max)
+                ].copy()
 
-            chart = (base + rules + labels).resolve_scale(
-                color="independent", x="shared", y="shared"
-            )
-            st.altair_chart(chart, use_container_width=True)
+                # 3) Appliquer l’échelle Y au line chart
+                base = base.encode(
+                    y=alt.Y(
+                        "pts:Q",
+                        title="Points de classement",
+                        scale=alt.Scale(domain=[y_min, y_max]),
+                    )
+                )
+
+                # 4) Si au moins un seuil est dans la fenêtre, on trace rules + labels avec lines_df_zoom
+                if not lines_df_zoom.empty:
+                    rules = (
+                        alt.Chart(lines_df_zoom)
+                        .mark_rule(strokeDash=[4, 4], strokeWidth=2)
+                        .encode(
+                            y="y:Q",
+                            color=alt.Color(
+                                "label:N",
+                                scale=alt.Scale(range=lines_df_zoom["color"].tolist()),
+                                legend=None,
+                            ),
+                        )
+                    )
+
+                    x_max = df_player["date"].max()
+                    labels = (
+                        alt.Chart(lines_df_zoom.assign(x=x_max))
+                        .mark_text(align="left", dx=6, dy=-6, fontWeight="bold")
+                        .encode(
+                            x="x:T",
+                            y="y:Q",
+                            text="label:N",
+                            color=alt.Color(
+                                "label:N",
+                                scale=alt.Scale(range=lines_df_zoom["color"].tolist()),
+                                legend=None,
+                            ),
+                        )
+                    )
+
+                    chart = (base + rules + labels).resolve_scale(
+                        color="independent", x="shared", y="shared"
+                    )
+                else:
+                    # aucun seuil dans la fenêtre → juste la courbe
+                    chart = base
+
+                st.altair_chart(chart, use_container_width=True)
