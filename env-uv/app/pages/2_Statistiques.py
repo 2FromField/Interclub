@@ -189,7 +189,6 @@ def best_ranks_lists(df: pd.DataFrame, player_name: str):
     # Variables
     p1, p2 = split2(s["player"])
     r1, r2 = split2(s["rank"])
-    print(p1, p2)
 
     player = pd.Series("", index=s.index)
     rank = pd.Series("", index=s.index)
