@@ -739,11 +739,11 @@ def box_color_histo(
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}; margin-top:-20px'>{aob_team}</span></div>",
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[0]}); margin-top:-15px'><span style='font-size:1rem; opacity:{opacity_check_interclub(aob_score,opponent_score)[0]}'>{aob_team}</span></div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]}); margin-bottom: 15px'><span style='font-size:1rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}; margin-top:-20px'>{opponent_team}</span></div>",
+                f"<div style='background-color:rgba(0, 0, 0, {opacity_check_interclub(aob_score,opponent_score)[1]}); margin-bottom: 15px'><span style='font-size:1rem;opacity:{opacity_check_interclub(aob_score,opponent_score)[1]}'>{opponent_team}</span></div>",
                 unsafe_allow_html=True,
             )
 
