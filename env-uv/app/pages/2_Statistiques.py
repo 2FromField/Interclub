@@ -877,9 +877,10 @@ if player_sel and player_sel != "-- Tous les joueurs --":
 
     #
     df_kpi = df.copy()
+    print(df_kpi)
 
     # Rencontres jouées par le joueur sélectionné
-    journeys = list(df_kpi.date.unique())
+    journeys = list(df_kpi.id.unique())
 
     # Dataframe des activités
     df_activity = pd.DataFrame(
@@ -887,7 +888,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
     )
 
     for d in journeys:
-        df_filtered = df_kpi[df_kpi["date"] == d].reset_index(drop=True)
+        df_filtered = df_kpi[df_kpi["id"] == d].reset_index(drop=True)
         df_filtered["date"] = df_filtered["date"].dt.strftime("%d-%m-%Y")
 
         if df_filtered.empty:
@@ -914,178 +915,13 @@ if player_sel and player_sel != "-- Tous les joueurs --":
                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
                 )
 
-    for k in range(len(df_activity)):
-        print(df_activity.mixte[k])
+    for k in range(len(df_activity) - 1, -1, -1):
         kpi_card_activity(
             f"{df_activity.date[k]} - {df_activity.opponent[k]}",
             f"{'...' if pd.isna(df_activity.simple[k]) else df_activity.simple[k]}",
             f"{'...' if pd.isna(df_activity.double[k]) else df_activity.double[k]}",
             f"{'...' if pd.isna(df_activity.mixte[k]) else df_activity.mixte[k]}",
         )
-
-# def activity(df: pd.DataFrame):
-#     t1, t2, t3, t4, t5 = st.columns([1, 5, 1, 1, 1], gap="small")
-#     title_style = "margin:0; color:black; font-size:1rem; line-height:1.1; text-align:center; font-weight:bold;"
-#     common_style = "margin:0; color:white; font-size:1.2rem; line-height:1.1; margin-top:8px; text-align:center;"
-#     no_style = "color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; margin-bottom: 28px;"
-#     loose_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px red solid; color:red; border-radius:5px;"
-#     win_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px green solid; color:green; border-radius:5px;"
-
-#     with t1:
-#         st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
-#         for i in range(len(df)):
-#             st.markdown(
-#                 f'<p style="{common_style}">{df.date[i]}</p>', unsafe_allow_html=True
-#             )
-#     with t2:
-#         st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
-#         for i in range(len(df)):
-#             st.markdown(
-#                 f'<p style="{common_style}">{df.opponent[i]}</p>',
-#                 unsafe_allow_html=True,
-#             )
-#     with t3:
-#         st.markdown(f'<p style="{title_style}">S</p>', unsafe_allow_html=True)
-
-#         for i in range(len(df)):
-#             val = df.loc[i, "simple"]  # plus clair que df.simple[i]
-
-#             # 1) valeur manquante ?
-#             if pd.isna(val):
-#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-#             # 2) défaite (score négatif)
-#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-#                 st.markdown(
-#                     f'<p style="{loose_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-
-#             # 3) victoire (score positif ou zéro)
-#             else:
-#                 st.markdown(
-#                     f'<p style="{win_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-#     with t4:
-#         st.markdown(f'<p style="{title_style}">D</p>', unsafe_allow_html=True)
-#         for i in range(len(df)):
-#             val = df.loc[i, "double"]  # plus clair que df.simple[i]
-
-#             # 1) valeur manquante ?
-#             if pd.isna(val):
-#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-#             # 2) défaite (score négatif)
-#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-#                 st.markdown(
-#                     f'<p style="{loose_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-
-#             # 3) victoire (score positif ou zéro)
-#             else:
-#                 st.markdown(
-#                     f'<p style="{win_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-#     with t5:
-#         st.markdown(f'<p style="{title_style}">M</p>', unsafe_allow_html=True)
-#         for i in range(len(df)):
-#             val = df.loc[i, "mixte"]  # plus clair que df.simple[i]
-
-#             # 1) valeur manquante ?
-#             if pd.isna(val):
-#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-#             # 2) défaite (score négatif)
-#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-#                 st.markdown(
-#                     f'<p style="{loose_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-
-#             # 3) victoire (score positif ou zéro)
-#             else:
-#                 st.markdown(
-#                     f'<p style="{win_style}">{val}</p>',
-#                     unsafe_allow_html=True,
-#                 )
-
-
-# css_activity = """
-# {
-#     background-color: #444;
-#     padding-top: 0.6rem;
-#     padding-bottom: 2.8rem;
-#     padding-left: 0.4rem;
-#     padding-right: 0.4rem;
-#     border-radius: 10px;
-
-#     /* pour que le fond colle bien aux widgets internes */
-#     margin-top: 0rem;
-#     margin-bottom: 0.2rem;
-# }
-# """
-
-# if player_sel and player_sel != "-- Tous les joueurs --":
-#     st.title("ACTIVITES")
-
-#     target = player_sel.strip().casefold()
-#     # explode pour un match vectorisé sur chaque token séparé par '/'
-#     tokens = (
-#         df["player"]
-#         .fillna("")
-#         .str.split("/")  # -> liste de noms
-#         .explode()  # une ligne par nom
-#         .str.strip()
-#         .str.casefold()  # normalisation
-#     )
-#     mask = tokens.eq(target).groupby(level=0).any()  # any par ligne d'origine
-#     df = df[mask].reset_index(drop=True)
-
-#     #
-#     df_kpi = df.copy()
-
-#     # Rencontres jouées par le joueur sélectionné
-#     journeys = list(df_kpi.date.unique())
-
-#     # Dataframe des activités
-#     df_activity = pd.DataFrame(
-#         [], columns=["date", "opponent", "simple", "double", "mixte"]
-#     )
-
-#     for d in journeys:
-#         df_filtered = df_kpi[df_kpi["date"] == d].reset_index(drop=True)
-#         df_filtered["date"] = df_filtered["date"].dt.strftime("%d-%m-%Y")
-
-#         if df_filtered.empty:
-#             continue  # au cas où aucune ligne pour cette date
-
-#         row_idx = len(df_activity)  # index du nouveau dataframe
-
-#         df_activity.loc[row_idx, "date"] = df_filtered.loc[0, "date"]
-#         df_activity.loc[row_idx, "opponent"] = df_filtered.loc[0, "opponent_team"]
-
-#         for i in range(len(df_filtered)):
-#             if df_filtered.loc[i, "match_type_label"] == "Simple":
-#                 df_activity.loc[row_idx, "simple"] = df_filtered.loc[i, "aob_grind"]
-#             if df_filtered.loc[i, "match_type_label"] == "Double":
-#                 df_activity.loc[row_idx, "double"] = (
-#                     df_filtered.loc[i, "aob_grind"].split("/")[0]
-#                     if df_filtered.loc[i, "player"].split("/")[0] == player_sel
-#                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
-#                 )
-#             if df_filtered.loc[i, "match_type_label"] == "Mixte":
-#                 df_activity.loc[row_idx, "mixte"] = (
-#                     df_filtered.loc[i, "aob_grind"].split("/")[0]
-#                     if df_filtered.loc[i, "player"].split("/")[0] == player_sel
-#                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
-#                 )
-
-#     with stylable_container(key="activity", css_styles=css_activity):
-#         activity(df=df_activity)
-
 
 ##################################################################
 #                      OVERVIEW D'EQUIPE                         #
