@@ -976,7 +976,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                     color: white;
                     font-weight: bold;
                 '>
-                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                    {df.opponent_team.iloc[0]}
                 </div>
 
                 {match_box(df, 'SH1', 'SH1')}
@@ -1010,7 +1010,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                     color: white;
                     font-weight: bold;
                 '>
-                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                    {df.opponent_team.iloc[0]}
                 </div>
 
                 {match_box(df, 'SH1', 'SH1')}
@@ -1043,7 +1043,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                     color: white;
                     font-weight: bold;
                 '>
-                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                    {df.opponent_team.iloc[0]}
                 </div>
 
                 {match_box(df, 'SH1', 'SH1')}
