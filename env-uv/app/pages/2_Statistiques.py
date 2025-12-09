@@ -926,26 +926,31 @@ if player_sel and player_sel != "-- Tous les joueurs --":
 ##################################################################
 #                      OVERVIEW D'EQUIPE                         #
 ##################################################################
-def box(color: str, text: str):
-    st.markdown(
-        f"""
-        <div style="
-            width: 30px;
-            height: 30px;
-            background-color: {color};
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        ">
-            {text}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+def box_html(color: str, text: str) -> str:
+    return f"""
+    <div style="
+        width: 30px;
+        height: 30px;
+        background-color: {color};
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        flex: 0 0 auto;
+    ">
+        {text}
+    </div>
+    """
+
+
+# helpers pour la couleur
+def match_box(df: pd.DataFrame, type_match: str, label: str) -> str:
+    win = df.loc[df.type_match == type_match, "win"].iloc[0]
+    color = "green" if win == "aob" else "red"
+    return box_html(color, label)
 
 
 def matrix_color(df: pd.DataFrame, division: str):
@@ -953,199 +958,135 @@ def matrix_color(df: pd.DataFrame, division: str):
     df["date"] = df["date"].dt.strftime("%d-%m-%Y")
     #
     if division in ["PR", "D3", "D2"]:
-        date, team, m1, m2, m3, m4, m5, m6, m7, m8 = st.columns(10, gap="small")
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 180px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                </div>
 
-        with date:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.date[0]}</p>',
-                unsafe_allow_html=True,
-            )
-        with team:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.opponent_team[0]}</p>',
-                unsafe_allow_html=True,
-            )
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SD1', 'SD1')}
+                {match_box(df, 'SD2', 'SD2')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1', 'MX1')}
+                {match_box(df, 'MX2', 'MX2')}
+            """
 
-        with m1:
-            if df.loc[df.type_match == "SH1", "win"].iloc[0] == "aob":
-                box("green", "SH1")
-            else:
-                box("red", "SH1")
-        with m2:
-            if df.loc[df.type_match == "SH2", "win"].iloc[0] == "aob":
-                box("green", "SH2")
-            else:
-                box("red", "SH2")
-        with m3:
-            if df.loc[df.type_match == "SD1", "win"].iloc[0] == "aob":
-                box("green", "SD1")
-            else:
-                box("red", "SD1")
-        with m4:
-            if df.loc[df.type_match == "SD2", "win"].iloc[0] == "aob":
-                box("green", "SD2")
-            else:
-                box("red", "SD2")
-        with m5:
-            if df.loc[df.type_match == "DH", "win"].iloc[0] == "aob":
-                box("green", "DH")
-            else:
-                box("red", "DH")
-        with m6:
-            if df.loc[df.type_match == "DD", "win"].iloc[0] == "aob":
-                box("green", "DD")
-            else:
-                box("red", "DD")
-        with m7:
-            if df.loc[df.type_match == "MX1", "win"].iloc[0] == "aob":
-                box("green", "MX1")
-            else:
-                box("red", "MX1")
-        with m8:
-            if df.loc[df.type_match == "MX2", "win"].iloc[0] == "aob":
-                box("green", "MX2")
-            else:
-                box("red", "MX2")
+        st.markdown(row_html, unsafe_allow_html=True)
     #
     if division == "D5":
-        date, team, m1, m2, m3, m5, m6, m7, m8 = st.columns(9, gap="small")
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 180px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                </div>
 
-        with date:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.date[0]}</p>',
-                unsafe_allow_html=True,
-            )
-        with team:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.opponent_team[0]}</p>',
-                unsafe_allow_html=True,
-            )
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SD1', 'SD1')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1', 'MX1')}
+                {match_box(df, 'MX2', 'MX2')}
+            """
 
-        with m1:
-            if df.loc[df.type_match == "SH1", "win"].iloc[0] == "aob":
-                box("green", "SH1")
-            else:
-                box("red", "SH1")
-        with m2:
-            if df.loc[df.type_match == "SH2", "win"].iloc[0] == "aob":
-                box("green", "SH2")
-            else:
-                box("red", "SH2")
-        with m3:
-            if df.loc[df.type_match == "SD1", "win"].iloc[0] == "aob":
-                box("green", "SD1")
-            else:
-                box("red", "SD1")
-        with m5:
-            if df.loc[df.type_match == "DH", "win"].iloc[0] == "aob":
-                box("green", "DH")
-            else:
-                box("red", "DH")
-        with m6:
-            if df.loc[df.type_match == "DD", "win"].iloc[0] == "aob":
-                box("green", "DD")
-            else:
-                box("red", "DD")
-        with m7:
-            if df.loc[df.type_match == "MX1", "win"].iloc[0] == "aob":
-                box("green", "MX1")
-            else:
-                box("red", "MX1")
-        with m8:
-            if df.loc[df.type_match == "MX2", "win"].iloc[0] == "aob":
-                box("green", "MX2")
-            else:
-                box("red", "MX2")
+        st.markdown(row_html, unsafe_allow_html=True)
     #
     if division == "H2":
-        date, team, m1, m2, m3, m4, m5, m6 = st.columns(8, gap="small")
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 180px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                </div>
 
-        with date:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.date[0]}</p>',
-                unsafe_allow_html=True,
-            )
-        with team:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.opponent_team[0]}</p>',
-                unsafe_allow_html=True,
-            )
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SH3', 'SH3')}
+                {match_box(df, 'SH4', 'SH4')}
+                {match_box(df, 'DH1',  'DH1')}
+                {match_box(df, 'DH2',  'DH2')}
+            """
 
-        with m1:
-            if df.loc[df.type_match == "SH1", "win"].iloc[0] == "aob":
-                box("green", "SH1")
-            else:
-                box("red", "SH1")
-        with m2:
-            if df.loc[df.type_match == "SH2", "win"].iloc[0] == "aob":
-                box("green", "SH2")
-            else:
-                box("red", "SH2")
-        with m3:
-            if df.loc[df.type_match == "SH3", "win"].iloc[0] == "aob":
-                box("green", "SH3")
-            else:
-                box("red", "SH3")
-        with m4:
-            if df.loc[df.type_match == "SH4", "win"].iloc[0] == "aob":
-                box("green", "SH4")
-            else:
-                box("red", "SH4")
-        with m5:
-            if df.loc[df.type_match == "DH1", "win"].iloc[0] == "aob":
-                box("green", "DH1")
-            else:
-                box("red", "DH1")
-        with m6:
-            if df.loc[df.type_match == "DH2", "win"].iloc[0] == "aob":
-                box("green", "DH2")
-            else:
-                box("red", "DH2")
+        st.markdown(row_html, unsafe_allow_html=True)
     #
     if division == "V3":
-        date, team, m1, m2, m3, m4, m5, m6 = st.columns(8, gap="small")
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 180px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.date.iloc[0]} - {df.opponent_team.iloc[0]}
+                </div>
 
-        with date:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.date[0]}</p>',
-                unsafe_allow_html=True,
-            )
-        with team:
-            st.markdown(
-                f'<p style="margin-bottom: 8px; color:white; font-weight:bold;">{df.opponent_team[0]}</p>',
-                unsafe_allow_html=True,
-            )
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1',  'MX1')}
+                {match_box(df, 'MX2',  'MX2')}
+            """
 
-        with m1:
-            if df.loc[df.type_match == "SH1", "win"].iloc[0] == "aob":
-                box("green", "SH1")
-            else:
-                box("red", "SH1")
-        with m2:
-            if df.loc[df.type_match == "SH2", "win"].iloc[0] == "aob":
-                box("green", "SH2")
-            else:
-                box("red", "SH2")
-        with m3:
-            if df.loc[df.type_match == "DH", "win"].iloc[0] == "aob":
-                box("green", "DH")
-            else:
-                box("red", "DH")
-        with m4:
-            if df.loc[df.type_match == "DD", "win"].iloc[0] == "aob":
-                box("green", "DD")
-            else:
-                box("red", "DD")
-        with m5:
-            if df.loc[df.type_match == "MX1", "win"].iloc[0] == "aob":
-                box("green", "MX1")
-            else:
-                box("red", "MX1")
-        with m6:
-            if df.loc[df.type_match == "MX2", "win"].iloc[0] == "aob":
-                box("green", "MX2")
-            else:
-                box("red", "MX2")
+        st.markdown(row_html, unsafe_allow_html=True)
 
 
 # -- Filtre équipe (si sélectionnée uniquement)
