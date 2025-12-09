@@ -255,7 +255,6 @@ def current_streak(results: list):
 #                           LAYOUT                               #
 ##################################################################
 st.set_page_config(page_title="Statistiques", layout="wide")
-st.title("Statistiques")
 
 
 ##################################################################
@@ -620,6 +619,8 @@ else:
     # --- Sélection joueur ---
     who = st.session_state.get("dd_player_filter")
     if who and who != "-- Tous les joueurs --":
+        st.title("EVOLUTION")
+
         df_player = unit_rows[unit_rows["player"] == who].sort_values("date")
 
         if df_player.empty:
@@ -733,114 +734,134 @@ else:
 
 
 ##################################################################
-#                          OVERVIEW                              #
+#                    OVERVIEW INDIVIDUEL                         #
 ##################################################################
-def activity(df: pd.DataFrame):
-    t1, t2, t3, t4, t5 = st.columns([1, 5, 1, 1, 1], gap="small")
-    title_style = "margin:0; color:black; font-size:1rem; line-height:1.1; text-align:center; font-weight:bold;"
-    common_style = "margin:0; color:white; font-size:1.2rem; line-height:1.1; margin-top:8px; text-align:center;"
-    no_style = "color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; margin-bottom: 28px;"
-    loose_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px red solid; color:red; border-radius:5px;"
-    win_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px green solid; color:green; border-radius:5px;"
-
-    with t1:
-        st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
-        for i in range(len(df)):
-            st.markdown(
-                f'<p style="{common_style}">{df.date[i]}</p>', unsafe_allow_html=True
-            )
-    with t2:
-        st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
-        for i in range(len(df)):
-            st.markdown(
-                f'<p style="{common_style}">{df.opponent[i]}</p>',
-                unsafe_allow_html=True,
-            )
-    with t3:
-        st.markdown(f'<p style="{title_style}">S</p>', unsafe_allow_html=True)
-
-        for i in range(len(df)):
-            val = df.loc[i, "simple"]  # plus clair que df.simple[i]
-
-            # 1) valeur manquante ?
-            if pd.isna(val):
-                st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-            # 2) défaite (score négatif)
-            elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-                st.markdown(
-                    f'<p style="{loose_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-
-            # 3) victoire (score positif ou zéro)
-            else:
-                st.markdown(
-                    f'<p style="{win_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-    with t4:
-        st.markdown(f'<p style="{title_style}">D</p>', unsafe_allow_html=True)
-        for i in range(len(df)):
-            val = df.loc[i, "double"]  # plus clair que df.simple[i]
-
-            # 1) valeur manquante ?
-            if pd.isna(val):
-                st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-            # 2) défaite (score négatif)
-            elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-                st.markdown(
-                    f'<p style="{loose_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-
-            # 3) victoire (score positif ou zéro)
-            else:
-                st.markdown(
-                    f'<p style="{win_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-    with t5:
-        st.markdown(f'<p style="{title_style}">M</p>', unsafe_allow_html=True)
-        for i in range(len(df)):
-            val = df.loc[i, "mixte"]  # plus clair que df.simple[i]
-
-            # 1) valeur manquante ?
-            if pd.isna(val):
-                st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
-
-            # 2) défaite (score négatif)
-            elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
-                st.markdown(
-                    f'<p style="{loose_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-
-            # 3) victoire (score positif ou zéro)
-            else:
-                st.markdown(
-                    f'<p style="{win_style}">{val}</p>',
-                    unsafe_allow_html=True,
-                )
-
-
-css_activity = """
-{
-    background-color: #444;
-    padding-top: 0.6rem;
-    padding-bottom: 2.8rem;
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-    border-radius: 10px;
-
-    /* pour que le fond colle bien aux widgets internes */
-    margin-top: 0rem;
-    margin-bottom: 0.2rem;
+st.markdown(
+    """
+<style>
+.evo-card{
+  background:#f1f3f5;           /* gris clair */
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px 14px;
+  text-align:center;
+  min-height:110px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  margin-bottom: 30px;
 }
-"""
+.evo-title{
+  font-size:1.2rem;
+  font-weight: bold;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:#374151;                 /* gris foncé */
+  margin:0 0 6px 0;
+  opacity:.85;
+}
+.evo-value{
+  font-size:2rem;                /* valeur bien visible */
+  font-weight:800;
+  margin:0;
+  color:#111827;
+  text-align: center;
+}
+.evo-sub{
+  font-size:.9rem;
+  color:#6b7280;
+  margin-top:0px;
+}
+.split-value{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.win-value{
+    color:green; 
+    padding: 3px 10px 3px 10px; 
+    border: 2px green solid; 
+    border-radius: 5px;
+}
+.loose-value{
+    color:red; 
+    padding: 3px 10px 3px 10px; 
+    border: 2px red solid; 
+    border-radius: 5px;
+}
+.no-value{
+    color:grey; 
+    padding: 3px 10px 3px 10px; 
+    border: 2px grey solid; 
+    border-radius: 5px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+def kpi_card_activity(
+    title: str,
+    value_s: str | float,
+    value_d: str | float,
+    value_m: str | float,
+):
+    """Carte des KPIs
+
+    Args:
+        title (str): Nom de la carte.
+        value (int|float): Valeur affichée.
+        sub (html): divisions html supplémentaires (ex: <div class="div-exemple">text</div>).
+    """
+
+    # Attribuer le jeu de couleurs selon les résultats
+    def activity_kpi(value: str):
+        """Attribue la couleur du texte et de l'encadrement des points remportés/perdus/non-reçus
+
+        Args:
+            value (str): points obtenus à l'issue d'un match
+
+        Returns:
+            style: style CSS attribué au span du KPI
+            value: valeur du KPI (str)
+        """
+        if "-" in value:
+            style = "loose-value"
+            value = value
+        elif value == "...":
+            style = "no-value"
+            value = value
+        else:
+            style = "win-value"
+            value = f"+{value}"
+        #
+        return style, value
+
+    st.markdown(
+        f"""
+        <div class="evo-card">
+          <div class="evo-title">{title}</div>
+          <div class="split-value">
+            <div class="evo-value">
+                <span class={activity_kpi(value_s)[0]}>{activity_kpi(value_s)[1]}</span>
+            </div>
+            <div class="evo-value">
+                <span class={activity_kpi(value_d)[0]}>{activity_kpi(value_d)[1]}</span>
+            </div>
+            <div class="evo-value">
+                <span class={activity_kpi(value_m)[0]}>{activity_kpi(value_m)[1]}</span>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 if player_sel and player_sel != "-- Tous les joueurs --":
+    st.title("ACTIVITES")
+
     target = player_sel.strip().casefold()
     # explode pour un match vectorisé sur chaque token séparé par '/'
     tokens = (
@@ -893,7 +914,186 @@ if player_sel and player_sel != "-- Tous les joueurs --":
                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
                 )
 
-    print(df_activity)
+    for k in range(len(df_activity)):
+        print(df_activity.mixte[k])
+        kpi_card_activity(
+            f"{df_activity.date[k]} - {df_activity.opponent[k]}",
+            f"{'...' if pd.isna(df_activity.simple[k]) else df_activity.simple[k]}",
+            f"{'...' if pd.isna(df_activity.double[k]) else df_activity.double[k]}",
+            f"{'...' if pd.isna(df_activity.mixte[k]) else df_activity.mixte[k]}",
+        )
 
-    with stylable_container(key="activity", css_styles=css_activity):
-        activity(df=df_activity)
+# def activity(df: pd.DataFrame):
+#     t1, t2, t3, t4, t5 = st.columns([1, 5, 1, 1, 1], gap="small")
+#     title_style = "margin:0; color:black; font-size:1rem; line-height:1.1; text-align:center; font-weight:bold;"
+#     common_style = "margin:0; color:white; font-size:1.2rem; line-height:1.1; margin-top:8px; text-align:center;"
+#     no_style = "color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; margin-bottom: 28px;"
+#     loose_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px red solid; color:red; border-radius:5px;"
+#     win_style = "margin:0; color:white; font-size:1rem; line-height:1.1; margin-top:8px; text-align:center; border:1px green solid; color:green; border-radius:5px;"
+
+#     with t1:
+#         st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
+#         for i in range(len(df)):
+#             st.markdown(
+#                 f'<p style="{common_style}">{df.date[i]}</p>', unsafe_allow_html=True
+#             )
+#     with t2:
+#         st.markdown(f'<p style="{title_style}"></p>', unsafe_allow_html=True)
+#         for i in range(len(df)):
+#             st.markdown(
+#                 f'<p style="{common_style}">{df.opponent[i]}</p>',
+#                 unsafe_allow_html=True,
+#             )
+#     with t3:
+#         st.markdown(f'<p style="{title_style}">S</p>', unsafe_allow_html=True)
+
+#         for i in range(len(df)):
+#             val = df.loc[i, "simple"]  # plus clair que df.simple[i]
+
+#             # 1) valeur manquante ?
+#             if pd.isna(val):
+#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
+
+#             # 2) défaite (score négatif)
+#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
+#                 st.markdown(
+#                     f'<p style="{loose_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+
+#             # 3) victoire (score positif ou zéro)
+#             else:
+#                 st.markdown(
+#                     f'<p style="{win_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+#     with t4:
+#         st.markdown(f'<p style="{title_style}">D</p>', unsafe_allow_html=True)
+#         for i in range(len(df)):
+#             val = df.loc[i, "double"]  # plus clair que df.simple[i]
+
+#             # 1) valeur manquante ?
+#             if pd.isna(val):
+#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
+
+#             # 2) défaite (score négatif)
+#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
+#                 st.markdown(
+#                     f'<p style="{loose_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+
+#             # 3) victoire (score positif ou zéro)
+#             else:
+#                 st.markdown(
+#                     f'<p style="{win_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+#     with t5:
+#         st.markdown(f'<p style="{title_style}">M</p>', unsafe_allow_html=True)
+#         for i in range(len(df)):
+#             val = df.loc[i, "mixte"]  # plus clair que df.simple[i]
+
+#             # 1) valeur manquante ?
+#             if pd.isna(val):
+#                 st.markdown(f'<p style="{no_style}"></p>', unsafe_allow_html=True)
+
+#             # 2) défaite (score négatif)
+#             elif float(val) < 0:  # ou int(val) si tu es sûr que c'est un entier
+#                 st.markdown(
+#                     f'<p style="{loose_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+
+#             # 3) victoire (score positif ou zéro)
+#             else:
+#                 st.markdown(
+#                     f'<p style="{win_style}">{val}</p>',
+#                     unsafe_allow_html=True,
+#                 )
+
+
+# css_activity = """
+# {
+#     background-color: #444;
+#     padding-top: 0.6rem;
+#     padding-bottom: 2.8rem;
+#     padding-left: 0.4rem;
+#     padding-right: 0.4rem;
+#     border-radius: 10px;
+
+#     /* pour que le fond colle bien aux widgets internes */
+#     margin-top: 0rem;
+#     margin-bottom: 0.2rem;
+# }
+# """
+
+# if player_sel and player_sel != "-- Tous les joueurs --":
+#     st.title("ACTIVITES")
+
+#     target = player_sel.strip().casefold()
+#     # explode pour un match vectorisé sur chaque token séparé par '/'
+#     tokens = (
+#         df["player"]
+#         .fillna("")
+#         .str.split("/")  # -> liste de noms
+#         .explode()  # une ligne par nom
+#         .str.strip()
+#         .str.casefold()  # normalisation
+#     )
+#     mask = tokens.eq(target).groupby(level=0).any()  # any par ligne d'origine
+#     df = df[mask].reset_index(drop=True)
+
+#     #
+#     df_kpi = df.copy()
+
+#     # Rencontres jouées par le joueur sélectionné
+#     journeys = list(df_kpi.date.unique())
+
+#     # Dataframe des activités
+#     df_activity = pd.DataFrame(
+#         [], columns=["date", "opponent", "simple", "double", "mixte"]
+#     )
+
+#     for d in journeys:
+#         df_filtered = df_kpi[df_kpi["date"] == d].reset_index(drop=True)
+#         df_filtered["date"] = df_filtered["date"].dt.strftime("%d-%m-%Y")
+
+#         if df_filtered.empty:
+#             continue  # au cas où aucune ligne pour cette date
+
+#         row_idx = len(df_activity)  # index du nouveau dataframe
+
+#         df_activity.loc[row_idx, "date"] = df_filtered.loc[0, "date"]
+#         df_activity.loc[row_idx, "opponent"] = df_filtered.loc[0, "opponent_team"]
+
+#         for i in range(len(df_filtered)):
+#             if df_filtered.loc[i, "match_type_label"] == "Simple":
+#                 df_activity.loc[row_idx, "simple"] = df_filtered.loc[i, "aob_grind"]
+#             if df_filtered.loc[i, "match_type_label"] == "Double":
+#                 df_activity.loc[row_idx, "double"] = (
+#                     df_filtered.loc[i, "aob_grind"].split("/")[0]
+#                     if df_filtered.loc[i, "player"].split("/")[0] == player_sel
+#                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
+#                 )
+#             if df_filtered.loc[i, "match_type_label"] == "Mixte":
+#                 df_activity.loc[row_idx, "mixte"] = (
+#                     df_filtered.loc[i, "aob_grind"].split("/")[0]
+#                     if df_filtered.loc[i, "player"].split("/")[0] == player_sel
+#                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
+#                 )
+
+#     with stylable_container(key="activity", css_styles=css_activity):
+#         activity(df=df_activity)
+
+
+##################################################################
+#                      OVERVIEW D'EQUIPE                         #
+##################################################################
+# -- Filtre équipe (si sélectionnée uniquement)
+if (
+    team_sel
+    and team_sel != "-- Toutes les équipes --"
+    and player_sel == "-- Tous les joueurs --"
+):
+    df = df[df["division"] == team_sel].reset_index(drop=True)
