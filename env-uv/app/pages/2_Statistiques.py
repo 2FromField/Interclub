@@ -968,7 +968,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                 padding: 4px 0;
             '>
                 <div style='
-                    flex: 0 0 80px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
@@ -1002,7 +1002,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                 padding: 4px 0;
             '>
                 <div style='
-                    flex: 0 0 80px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
@@ -1035,7 +1035,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                 padding: 4px 0;
             '>
                 <div style='
-                    flex: 0 0 80px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
@@ -1067,7 +1067,7 @@ def matrix_color(df: pd.DataFrame, division: str):
                 padding: 4px 0;
             '>
                 <div style='
-                    flex: 0 0 80px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
