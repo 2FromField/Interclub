@@ -840,7 +840,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
             padding: 4px 0;
         '>
             <div style='
-                flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                flex: 0 0 100px;          /* largeur fixe de la "colonne" date+équipe */
                 max-width: 180px;
                 white-space: nowrap;      /* tout sur une ligne */
                 overflow: hidden;         /* si trop long, on coupe */
@@ -850,7 +850,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
             '>
             </div>
             <div style='
-                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 100px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
@@ -877,7 +877,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
                 padding: 4px 0;
             '>
                 <div style='
-                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 100px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
@@ -888,7 +888,7 @@ if player_sel and player_sel != "-- Tous les joueurs --":
                     {df_activity.date[k]}
                 </div>
                 <div style='
-                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    flex: 0 0 100px;          /* largeur fixe de la "colonne" date+équipe */
                     max-width: 180px;
                     white-space: nowrap;      /* tout sur une ligne */
                     overflow: hidden;         /* si trop long, on coupe */
