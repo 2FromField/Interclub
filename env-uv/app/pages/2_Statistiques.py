@@ -736,127 +736,42 @@ else:
 ##################################################################
 #                    OVERVIEW INDIVIDUEL                         #
 ##################################################################
-st.markdown(
-    """
-<style>
-.evo-card{
-  background:#f1f3f5;           /* gris clair */
-  border:1px solid #e5e7eb;
-  border-radius:14px;
-  padding:18px 14px;
-  text-align:center;
-  min-height:110px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  margin-bottom: 30px;
-}
-.evo-title{
-  font-size:1.2rem;
-  font-weight: bold;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-  color:#374151;                 /* gris foncé */
-  margin:0 0 6px 0;
-  opacity:.85;
-}
-.evo-value{
-  font-size:2rem;                /* valeur bien visible */
-  font-weight:800;
-  margin:0;
-  color:#111827;
-  text-align: center;
-}
-.evo-sub{
-  font-size:.9rem;
-  color:#6b7280;
-  margin-top:0px;
-}
-.split-value{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.win-value{
-    color:green; 
-    padding: 3px 10px 3px 10px; 
-    border: 2px green solid; 
-    border-radius: 5px;
-}
-.loose-value{
-    color:red; 
-    padding: 3px 10px 3px 10px; 
-    border: 2px red solid; 
-    border-radius: 5px;
-}
-.no-value{
-    color:grey; 
-    padding: 3px 10px 3px 10px; 
-    border: 2px grey solid; 
-    border-radius: 5px;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-
-def kpi_card_activity(
-    title: str,
-    value_s: str | float,
-    value_d: str | float,
-    value_m: str | float,
-):
-    """Carte des KPIs
-
-    Args:
-        title (str): Nom de la carte.
-        value (int|float): Valeur affichée.
-        sub (html): divisions html supplémentaires (ex: <div class="div-exemple">text</div>).
+def box_html_indiv(color: str, text: str) -> str:
+    return f"""
+    <div style="
+        width: 30px;
+        height: 30px;
+        background-color: {color};
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        flex: 0 0 auto;
+    ">
+        {text}
+    </div>
     """
 
-    # Attribuer le jeu de couleurs selon les résultats
-    def activity_kpi(value: str):
-        """Attribue la couleur du texte et de l'encadrement des points remportés/perdus/non-reçus
 
-        Args:
-            value (str): points obtenus à l'issue d'un match
+# helpers pour la couleur
+def match_box_indiv(df: pd.DataFrame, type_match: str, line: int) -> str:
+    value = df[type_match].iloc[line]
 
-        Returns:
-            style: style CSS attribué au span du KPI
-            value: valeur du KPI (str)
-        """
-        if "-" in value:
-            style = "loose-value"
-            value = value
-        elif value == "...":
-            style = "no-value"
-            value = value
-        else:
-            style = "win-value"
-            value = f"+{value}"
-        #
-        return style, value
+    # Choix de la couleur
+    if "-" in str(value):
+        color = "red"
+        text = str(value)
+    elif pd.isna(value):
+        color = "grey"
+        text = "..."
+    else:
+        color = "green"
+        text = f"+{value}"
 
-    st.markdown(
-        f"""
-        <div class="evo-card">
-          <div class="evo-title">{title}</div>
-          <div class="split-value">
-            <div class="evo-value">
-                <span class={activity_kpi(value_s)[0]}>{activity_kpi(value_s)[1]}</span>
-            </div>
-            <div class="evo-value">
-                <span class={activity_kpi(value_d)[0]}>{activity_kpi(value_d)[1]}</span>
-            </div>
-            <div class="evo-value">
-                <span class={activity_kpi(value_m)[0]}>{activity_kpi(value_m)[1]}</span>
-            </div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    return box_html_indiv(color, text)
 
 
 if player_sel and player_sel != "-- Tous les joueurs --":
@@ -914,13 +829,81 @@ if player_sel and player_sel != "-- Tous les joueurs --":
                     else df_filtered.loc[i, "aob_grind"].split("/")[1]
                 )
 
+    # Entete des catégories
+    row_title = f"""
+        <div style='
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 4px 0;
+        '>
+            <div style='
+                flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                max-width: 180px;
+                white-space: nowrap;      /* tout sur une ligne */
+                overflow: hidden;         /* si trop long, on coupe */
+                text-overflow: ellipsis;  /* ... à la fin */
+                color: white;
+                font-weight: bold;
+            '>
+            </div>
+            <div style='
+                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+            </div>
+            {box_html_indiv("transparent", "S")}
+            {box_html_indiv("transparent", "D")}
+            {box_html_indiv("transparent", "M")}
+        """
+    st.markdown(row_title, unsafe_allow_html=True)
+
+    # Points remportés ou non à chaque rencontre
     for k in range(len(df_activity) - 1, -1, -1):
-        kpi_card_activity(
-            f"{df_activity.date[k]} - {df_activity.opponent[k]}",
-            f"{'...' if pd.isna(df_activity.simple[k]) else df_activity.simple[k]}",
-            f"{'...' if pd.isna(df_activity.double[k]) else df_activity.double[k]}",
-            f"{'...' if pd.isna(df_activity.mixte[k]) else df_activity.mixte[k]}",
-        )
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df_activity.date[k]}
+                </div>
+                <div style='
+                    flex: 0 0 250px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df_activity.opponent[k]}
+                </div>
+                {match_box_indiv(df_activity, 'simple', k)}
+                {match_box_indiv(df_activity, 'double', k)}
+                {match_box_indiv(df_activity, 'mixte', k)}
+            """
+
+        st.markdown(row_html, unsafe_allow_html=True)
 
 
 ##################################################################
