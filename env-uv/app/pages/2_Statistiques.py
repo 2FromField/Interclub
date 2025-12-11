@@ -394,6 +394,7 @@ result = m_ic[
         "aob_team",
         "opponent_team",
         "player",
+        "opponent_rank",
         "rank",
         "pts",
         "win",
@@ -538,6 +539,212 @@ elif player_sel and player_sel != "-- Tous les joueurs --":
         )
 
 else:
+    # -- Filtre équipe (si sélectionnée uniquement)
+    players = df["player"].str.split("/")
+    player_rank = df["rank"].str.split("/")
+    points = df["aob_grind"].astype(str).str.split("/")
+    categorie = df["type_match"].str.replace(r"\d+", "", regex=True)
+    date = df["date"]
+
+    # Explode en gardant l’alignement grâce à l’index
+    df_long = pd.DataFrame(
+        {
+            "player": players.explode().str.strip(),
+            "player_rank": player_rank.explode().str.strip(),
+            "points": points.explode().str.strip().astype(int),
+            "categorie": categorie,
+            "date": date,
+        }
+    )
+
+    #
+    s1, s2, s3, s4, s5 = st.columns(5, gap="small")
+    with s1:
+        # Caluler la somme de points remportés en totalité
+        df_points_tot_par_joueur = (
+            df_long.groupby("player", as_index=False)["points"]
+            .sum()
+            .sort_values("points", ascending=False)
+        ).reset_index(drop=True)
+
+        # Caluler la somme de points remportés par type de match
+        df_points_par_joueur = (
+            df_long.groupby(["player", "categorie"], as_index=False)["points"]
+            .sum()
+            .sort_values("points", ascending=False)
+        )
+
+        # Dataframe du joueur ayant remporté le plus de points (avec chaque type de match)
+        pts_eater = df_points_par_joueur[
+            (
+                df_points_par_joueur["player"]
+                == df_points_tot_par_joueur.loc[0, "player"]
+            )
+        ].reset_index(drop=True)
+
+        # Simple
+        mask_s = pts_eater["categorie"].str.contains("S", na=False)
+        pts_s = pts_eater.loc[mask_s, "points"].iloc[0] if mask_s.any() else 0
+        # Double
+        mask_d = pts_eater["categorie"].str.contains("D", na=False)
+        pts_d = pts_eater.loc[mask_d, "points"].iloc[0] if mask_d.any() else 0
+        # Mixte
+        mask_m = pts_eater["categorie"].str.contains("MX", na=False)
+        pts_m = pts_eater.loc[mask_m, "points"].iloc[0] if mask_m.any() else 0
+
+        #
+        kpi_card(
+            "Point Eater", pts_eater["player"][0], f"+{pts_s} / +{pts_d} / +{pts_m}"
+        )
+    with s2:
+        # Compter les victoires dans l'ordre chronologique
+        df_long = df_long.sort_values(["player", "date"])
+
+        # Créer une colonne "is_win" sommant les victoires
+        df_long["is_win"] = df_long["points"] > 0
+
+        # Calculer le win streak pour chaque match
+        def compute_streak(s):
+            # s est une Series de booléens (is_win) pour UN joueur
+            groups = (~s).cumsum()  # chaque défaite crée un nouveau groupe
+            streak = s.groupby(groups).cumsum()
+            return streak
+
+        df_long["win_streak"] = df_long.groupby("player")["is_win"].transform(
+            compute_streak
+        )
+
+        # Win Streak max par joueur
+        df_win_streak = (
+            df_long.groupby("player", as_index=False)["win_streak"]
+            .max()
+            .rename(columns={"win_streak": "best_win_streak"})
+            .sort_values("best_win_streak", ascending=False)
+        ).reset_index(drop=True)
+
+        #
+        kpi_card(
+            "Win Streaker",
+            df_win_streak["player"][0],
+            f"🔥{df_win_streak['best_win_streak'][0]}",
+        )
+    with s3:
+        # Nombre de match total joués par joueur
+        df_match_count = (
+            df_long.groupby("player", as_index=False)
+            .size()  # nombre de lignes = nombre de matchs joués
+            .rename(columns={"size": "nb_matchs"})
+            .sort_values("nb_matchs", ascending=False)
+        ).reset_index(drop=True)
+        #
+        kpi_card(
+            "Match Marathoner",
+            df_match_count["player"][0],
+            df_match_count["nb_matchs"][0],
+        )
+    with s4:
+        # Garder les matchs remportés
+        df_wins = df_long[df_long["points"] > 0].copy()
+
+        # Trouver la ligne avec le nombre de points maximal
+        if df_wins.empty:
+            # personne n'a de match gagné
+            best_row = None
+        else:
+            best_row = df_wins.loc[df_wins["points"].idxmax()].reset_index(drop=True)
+
+        kpi_card("Clutch Performer", best_row["player"][0], f"+{best_row['points'][0]}")
+    with s5:
+        # Winrate global par joueur
+        df_winrate_par_joueur = (
+            df_long.assign(is_win=df_long["points"] > 0)  # True si victoire
+            .groupby("player", as_index=False)
+            .agg(
+                nb_matchs=("is_win", "size"),
+                nb_wins=("is_win", "sum"),
+                winrate=(
+                    "is_win",
+                    "mean",
+                ),  # moyenne de True/False = ratio de victoires
+            )
+        )
+
+        # passer le winrate en pourcentage
+        df_winrate_par_joueur["winrate"] = (
+            df_winrate_par_joueur["winrate"] * 100
+        ).round(1)
+
+        # optionnel : trier par winrate puis nb_matchs
+        df_winrate_par_joueur = df_winrate_par_joueur.sort_values(
+            ["winrate", "nb_matchs"], ascending=[False, False]
+        ).reset_index(drop=True)
+
+        # Winrate par type de match
+        df_winrate_par_joueur_cat = (
+            df_long.assign(is_win=df_long["points"] > 0)
+            .groupby(["player", "categorie"], as_index=False)
+            .agg(
+                nb_matchs=("is_win", "size"),
+                nb_wins=("is_win", "sum"),
+                winrate=("is_win", "mean"),
+            )
+        )
+
+        df_winrate_par_joueur_cat["winrate"] = (
+            df_winrate_par_joueur_cat["winrate"] * 100
+        ).round(1)
+
+        df_winrate_par_joueur_cat = df_winrate_par_joueur_cat.sort_values(
+            ["player", "categorie"], ascending=[False, False]
+        ).reset_index(drop=True)
+
+        df_winrate_master = df_winrate_par_joueur_cat[
+            (df_winrate_par_joueur_cat["player"] == df_winrate_par_joueur["player"][0])
+        ].reset_index(drop=True)
+
+        # Simple
+        mask_s_cat = df_winrate_master["categorie"].str.contains("S", na=False)
+        pts_s_cat = (
+            df_winrate_master.loc[mask_s_cat, "winrate"].iloc[0]
+            if mask_s_cat.any()
+            else 0
+        )
+        nb_s_cat = (
+            df_winrate_master.loc[mask_s_cat, "nb_matchs"].iloc[0]
+            if mask_s_cat.any()
+            else 0
+        )
+        # Double
+        mask_d_cat = df_winrate_master["categorie"].str.contains("D", na=False)
+        pts_d_cat = (
+            df_winrate_master.loc[mask_d_cat, "winrate"].iloc[0]
+            if mask_d_cat.any()
+            else 0
+        )
+        nb_d_cat = (
+            df_winrate_master.loc[mask_d_cat, "nb_matchs"].iloc[0]
+            if mask_d_cat.any()
+            else 0
+        )
+        # Mixte
+        mask_m_cat = df_winrate_master["categorie"].str.contains("MX", na=False)
+        pts_m_cat = (
+            df_winrate_master.loc[mask_m_cat, "winrate"].iloc[0]
+            if mask_m_cat.any()
+            else 0
+        )
+        nb_m_cat = (
+            df_winrate_master.loc[mask_m_cat, "nb_matchs"].iloc[0]
+            if mask_m_cat.any()
+            else 0
+        )
+
+        #
+        kpi_card(
+            "Winrate Master",
+            df_winrate_master["player"][0],
+            f"{pts_s_cat}%({nb_s_cat}) / {pts_d_cat}%({nb_d_cat}) / {pts_m_cat}%({nb_m_cat})",
+        )
     # Si aucun élément n'est renseigné dans les dropdowns
     st.info("Sélectionnez un joueur/équipe pour afficher ses statistiques d'interclub")
 
