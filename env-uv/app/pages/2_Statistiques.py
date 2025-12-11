@@ -585,17 +585,33 @@ else:
         # Simple
         mask_s = pts_eater["categorie"].str.contains("S", na=False)
         pts_s = pts_eater.loc[mask_s, "points"].iloc[0] if mask_s.any() else 0
+        if pts_s == 0:
+            pts_s = 0
+        elif "-" in str(pts_s):
+            pts_s = f"{pts_s}"
+        else:
+            pts_s = f"+{pts_s}"
         # Double
         mask_d = pts_eater["categorie"].str.contains("D", na=False)
         pts_d = pts_eater.loc[mask_d, "points"].iloc[0] if mask_d.any() else 0
+        if pts_d == 0:
+            pts_d = 0
+        elif "-" in str(pts_d):
+            pts_d = f"{pts_d}"
+        else:
+            pts_d = f"+{pts_d}"
         # Mixte
         mask_m = pts_eater["categorie"].str.contains("MX", na=False)
         pts_m = pts_eater.loc[mask_m, "points"].iloc[0] if mask_m.any() else 0
+        if pts_m == 0:
+            pts_m = 0
+        elif "-" in str(pts_m):
+            pts_m = f"{pts_m}"
+        else:
+            pts_m = f"+{pts_m}"
 
         #
-        kpi_card(
-            "Point Eater", pts_eater["player"][0], f"+{pts_s} / +{pts_d} / +{pts_m}"
-        )
+        kpi_card("Point Eater", pts_eater["player"][0], f"{pts_s} / {pts_d} / {pts_m}")
     with s2:
         # Compter les victoires dans l'ordre chronologique
         df_long = df_long.sort_values(["player", "date"])
