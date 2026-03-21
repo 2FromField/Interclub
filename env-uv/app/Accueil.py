@@ -66,7 +66,7 @@ st.set_page_config(page_title="Accueil", layout="wide")
 # -- Image du club de badminton d'Orgères (35230)
 html = f"""
 <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-{img_to_html("assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
+{img_to_html("app/assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
 </div>
 """
 st.markdown(html, unsafe_allow_html=True)
@@ -88,11 +88,11 @@ def show_teams(path):
 
 c1, c2, c3 = st.columns(3, gap="small")
 with c1:
-    st.markdown(show_teams("assets/img/PR.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/img/D5.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/PR.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/D5.jpg"), unsafe_allow_html=True)
 with c2:
-    st.markdown(show_teams("assets/img/D2.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/img/H2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/D2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/H2.jpg"), unsafe_allow_html=True)
 with c3:
-    st.markdown(show_teams("assets/img/D3.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("assets/img/V3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/D3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams("app/assets/img/V3.jpg"), unsafe_allow_html=True)
