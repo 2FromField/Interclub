@@ -4,3 +4,4 @@ gspread>=6.2.1
 google-auth>=2.43.0
 gspread-dataframe>=3.3.1
 streamlit-extras>=0.7.8
+PyYAML==6.0.2
