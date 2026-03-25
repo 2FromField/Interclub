@@ -147,6 +147,7 @@ Ajoutez SHEET_ID et le bloc [gcp].
 - gspread
 - google-auth
 - altair
+- pyyaml
   Ainsi qu'un `runtime.txt` avec python-3.10.
 
 6. Déployez. L’URL aura la forme https://<app-name>-<user>.streamlit.app.
