@@ -2424,6 +2424,7 @@ dependencies = [
     { name = "google-auth" },
     { name = "gspread" },
     { name = "pandas" },
+    { name = "pyyaml" },
     { name = "streamlit" },
     { name = "streamlit-extras" },
 ]
@@ -2433,6 +2434,7 @@ requires-dist = [
     { name = "google-auth", specifier = ">=2.43.0" },
     { name = "gspread", specifier = ">=6.2.1" },
     { name = "pandas", specifier = ">=2.3.3" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "streamlit", specifier = ">=1.51.0" },
     { name = "streamlit-extras", specifier = ">=0.7.8" },
 ]

@@ -671,7 +671,6 @@ else:
                 df_wins["points"] == df_wins["points"].max()
             ].reset_index(drop=True)
 
-        print(best_row)
         kpi_card("Clutch Performer", best_row["player"][0], f"+{best_row['points'][0]}")
     with s5:
         # Winrate global par joueur
