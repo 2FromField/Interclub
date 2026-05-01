@@ -132,7 +132,7 @@ Ajoutez SHEET_ID et le bloc [gcp].
 
 4. Secrets: créez .streamlit/secrets.toml comme ci-dessus
 
-5. Lancer: `uv run streamlit run app/app.py`
+5. Lancer: `cd env-uv && uv run streamlit run app/Accueil.py`
 
 # ☁️ Déploiement — Streamlit Community Cloud
 
