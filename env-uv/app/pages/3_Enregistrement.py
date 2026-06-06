@@ -58,6 +58,136 @@ def reset_sh1():
     # optionnel : oublie la sélection dépendante si la catégorie change
     st.session_state.pop("sh1_player_home", None)
 
+@st.dialog("Vérification de l'enregistrement", width="large")
+def afficher_popup(df_filtered, row_interclub):
+    home_team, home_score, away_score, away_team = st.columns([5, 1, 1, 5], gap="small")
+    a_score = df_filtered["win"].fillna("").str.count("opponent").sum()
+    h_score = df_filtered["win"].fillna("").str.count("aob").sum()
+    with home_team :
+        st.markdown(
+            f'<p style="margin:0; color:white; text-align:left; font-size:2em; margin-bottom:15px; opacity:{utils.opacity_check_interclub(h_score,a_score)[0]}">{aob_team}</p>',
+            unsafe_allow_html=True,
+        )
+    with home_score:
+        st.markdown(
+            f'<p style="margin:0; color:white; text-align:center; font-size:2em; margin-bottom:15px; opacity:{utils.opacity_check_interclub(h_score,a_score)[0]}">{h_score}</p>',
+            unsafe_allow_html=True,
+        )
+    with away_score:
+        st.markdown(
+            f'<p style="margin:0; color:white; text-align:center; font-size:2em; margin-bottom:15px; opacity:{utils.opacity_check_interclub(h_score,a_score)[1]}">{a_score}</p>',
+            unsafe_allow_html=True,
+        )
+    with away_team:
+        st.markdown(
+            f'<p style="margin:0; color:white; text-align:right; font-size:2em; margin-bottom:15px; opacity:{utils.opacity_check_interclub(h_score,a_score)[1]}">{opponent_team}</p>',
+            unsafe_allow_html=True,
+        )
+    #
+    for k in range(len(df_filtered)):
+        r1c1, r1c2, r1c3 = st.columns([4, 2, 4], gap="small")
+        with r1c1:
+            # Joueurs de l'AOB
+            if "/" in str(df_filtered["aob_player_id"].loc[k]):
+                p1_id = int(df_filtered["aob_player_id"].loc[k].split("/")[0])
+                p2_id = int(df_filtered["aob_player_id"].loc[k].split("/")[1])
+                #
+                p1_name = (
+                    PLAYERS_TABLE[PLAYERS_TABLE["id_player"] == int(p1_id)]
+                    .reset_index(drop=True)["name"]
+                    .loc[0]
+                )
+                p2_name = (
+                    PLAYERS_TABLE[PLAYERS_TABLE["id_player"] == int(p2_id)]
+                    .reset_index(drop=True)["name"]
+                    .loc[0]
+                )
+                utils.match_name_histo(
+                    f"{p1_name}/{p2_name}",
+                    df_filtered["aob_rank"].loc[k],
+                    "left",
+                    utils.opacity_check(
+                        "aob",
+                        df_filtered["set1"].loc[k],
+                        df_filtered["set2"].loc[k],
+                        df_filtered["set3"].loc[k],
+                    ),
+                )
+            else:
+                utils.match_name_histo(
+                    PLAYERS_TABLE[
+                        PLAYERS_TABLE["id_player"]
+                        == int(df_filtered["aob_player_id"].loc[k])
+                    ]
+                    .reset_index(drop=True)["name"]
+                    .loc[0],
+                    df_filtered["aob_rank"].loc[k],
+                    "left",
+                    utils.opacity_check(
+                        "aob",
+                        df_filtered["set1"].loc[k],
+                        df_filtered["set2"].loc[k],
+                        df_filtered["set3"].loc[k],
+                    ),
+                )
+        with r1c2:
+            # Scores des différents sets
+            utils.match_score_histo(
+                df_filtered["set1"].loc[k],
+                df_filtered["set2"].loc[k],
+                df_filtered["set3"].loc[k],
+            )
+        with r1c3:
+            # Joueurs de l'extérieur
+            utils.match_name_histo(
+                df_filtered["opponent_player"].loc[k],
+                df_filtered["opponent_rank"].loc[k],
+                "right",
+                utils.opacity_check(
+                    "opponent",
+                    df_filtered["set1"].loc[k],
+                    df_filtered["set2"].loc[k],
+                    df_filtered["set3"].loc[k],
+                ),
+            )
+    
+    if st.button("Enregistrer"):
+        # Ajouter les nouvelles lignes
+        if categorie == "H2":
+            utils.append_rows_sheet(
+                [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row],
+                "TABLE_MATCHS",
+            )
+        elif categorie == "D5":
+            utils.append_rows_sheet(
+                [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row],
+                "TABLE_MATCHS",
+            )
+        elif categorie == "V3":
+            utils.append_rows_sheet(
+                [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row],
+                "TABLE_MATCHS",
+            )
+        else: # D2/D3/PR
+            utils.append_rows_sheet(
+                [
+                    sh1_row,
+                    sh2_row,
+                    sd1_row,
+                    sd2_row,
+                    dh_row,
+                    dd_row,
+                    mx1_row,
+                    mx2_row,
+                ],
+                "TABLE_MATCHS",
+            )
+        #
+        # Mise à jour de la table INTERCLUB
+        utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
+        st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
+        st.rerun()
+
 
 ##################################################################
 #                           LAYOUT                               #
@@ -201,7 +331,7 @@ with st.form("match_record"):
             # MX2
             utils.double_match(PLAYERS_TABLE, categorie, "mx2")
 
-    submitted = st.form_submit_button("Enregistrer")
+    submitted = st.form_submit_button("Vérification")
 
 # -- Sauvegarde des données enregistrées sur Google SHEET
 if submitted:
@@ -352,13 +482,6 @@ if submitted:
                         set3=f'{st.session_state.get("dh2_aob_set3")}/{st.session_state.get("dh2_opponent_set3")}',
                     ),
                 }
-                #
-                # Ajouter les nouvelles lignes
-                # append_row("data/matchs.csv", sh1_row)
-                utils.append_rows_sheet(
-                    [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row],
-                    "TABLE_MATCHS",
-                )
                 #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row]
@@ -524,13 +647,6 @@ if submitted:
                     ),
                 }
                 #
-                # Ajouter les nouvelles lignes
-                # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_rows_sheet(
-                    [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row],
-                    "TABLE_MATCHS",
-                )
-                #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row]
                 )
@@ -669,13 +785,6 @@ if submitted:
                         set3=f'{st.session_state.get("mx2_aob_set3")}/{st.session_state.get("mx2_opponent_set3")}',
                     ),
                 }
-                #
-                # Ajouter les nouvelles lignes
-                # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_rows_sheet(
-                    [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row],
-                    "TABLE_MATCHS",
-                )
                 #
                 match_df = utils.create_df_from_dict(
                     [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row]
@@ -866,22 +975,6 @@ if submitted:
                     ),
                 }
                 #
-                # Ajouter les nouvelles lignes
-                # append_row_sheet("data/matchs.csv", sh2_row)
-                utils.append_rows_sheet(
-                    [
-                        sh1_row,
-                        sh2_row,
-                        sd1_row,
-                        sd2_row,
-                        dh_row,
-                        dd_row,
-                        mx1_row,
-                        mx2_row,
-                    ],
-                    "TABLE_MATCHS",
-                )
-                #
                 match_df = utils.create_df_from_dict(
                     [
                         sh1_row,
@@ -895,6 +988,7 @@ if submitted:
                     ]
                 )
                 #
+            
             # Mise à jour de la table INTERCLUB
             row_interclub = {
                 # id;date;journey;division;aob_team;opponent_team;aob_score;opponent_score
@@ -910,9 +1004,9 @@ if submitted:
                 .str.count("opponent")
                 .sum(),
             }
-            # Mise à jour de la table INTERCLUB
-            utils.append_row_sheet(row_interclub, "TABLE_INTERCLUB")
-            st.session_state["flash"] = ("success", "✅ Enregistrement effectué !")
+            #
+            # Ouvrir la fenêtre de vérification
+            afficher_popup(match_df, row_interclub)
             #
         except Exception as e:
             st.session_state["flash"] = (

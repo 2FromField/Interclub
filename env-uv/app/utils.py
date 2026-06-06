@@ -7,6 +7,7 @@ from google.oauth2.service_account import Credentials
 import datetime as dt
 import yaml
 from pathlib import Path
+from datetime import datetime
 
 # -- Définition de l'environnement
 BASE_DIR = Path(__file__).resolve().parent  # /.../app
