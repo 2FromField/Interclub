@@ -8,6 +8,7 @@ import datetime as dt
 import yaml
 from pathlib import Path
 from datetime import datetime
+import base64
 
 # -- Définition de l'environnement
 BASE_DIR = Path(__file__).resolve().parent  # /.../app
@@ -22,6 +23,14 @@ env = config["env"]  # "dev" ou "prod"
 # --- Accès aux google sheets
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
+# Types de match
+S_TYPES = {"SH1", "SH2", "SH3", "SH4", "SD1", "SD2"}
+D_TYPES = {"DH", "DH1", "DH2", "DD", "DD1", "DD2"}
+M_TYPES = {"MX", "MX1", "MX2"}
+
+# Icones
+WIN_ICON = "🔥"
+COLD_ICON = "❄️"
 
 @st.cache_resource
 def _gspread_client():
@@ -830,3 +839,415 @@ def box_color_histo(
                             df_filtered["set3"].loc[k],
                         ),
                     )
+
+def kpi_card(title: str, value: str | float, sub=None):
+    """Carte des KPIs
+
+    Args:
+        title (str): Nom de la carte.
+        value (int|float): Valeur affichée.
+        sub (html): divisions html supplémentaires (ex: <div class="div-exemple">text</div>).
+    """
+    sub_html = f"<div class='kpi-sub'>{sub}</div>" if sub else ""
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+          <div class="kpi-title">{title}</div>
+          <div class="kpi-value">{value}</div>
+          {sub_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+def split2(series: pd.Series):
+    """Retourne (p1, p2) en découpant à '/', avec strip et '' si absent."""
+    s = series.fillna("").astype(str).str.strip()
+    parts = s.str.split("/", n=1, expand=True)
+    p1 = parts[0].fillna("").str.strip()
+    p2 = (
+        (parts[1].fillna("").str.strip())
+        if parts.shape[1] > 1
+        else pd.Series([""] * len(s), index=s.index)
+    )
+    return p1, p2
+
+def split2_col(df: pd.DataFrame, col: str):
+    """Applique split2 sur df[col] si la colonne existe, sinon sur une série vide."""
+    base = df[col] if col in df.columns else pd.Series([""] * len(df), index=df.index)
+    return split2(base)
+
+
+def join_if_two(p1: pd.Series, p2: pd.Series, sep=" / "):
+    """'A' + ' / B' seulement si p2 non vide."""
+    p1 = p1.fillna("").astype(str)
+    p2 = p2.fillna("").astype(str)
+    return p1.where(p2.eq(""), p1 + sep + p2)
+
+# Upload d'image en local
+def img_to_html(
+    rel_path_from_app_dir: str,
+    alt="image",
+    style="max-width:100%; height:auto; text-align: center",
+):
+    """Convertir une image au format .png/.jpg en une balise HTML
+
+    Args:
+        rel_path_from_app_dir (str): Chemin relatif au fichier image.
+        alt (str, optional): Type de fichie, ("image" par défaut).
+        style (str, optional): Style CSS additionnel (par défaut: "max-width:100%; height:auto; text-align: center").
+    """
+    # __file__ = app/pages/0_Accueil.py  → parents[1] = app/
+    app_dir = Path(__file__).resolve().parents[1]
+    path = (app_dir / rel_path_from_app_dir).resolve()  # ex: "assets/img/AOB_LOGO.jpg"
+    data = path.read_bytes()  # lève clairement si absent
+    ext = path.suffix.lstrip(".").lower()
+    b64 = base64.b64encode(data).decode()
+    return f'<img src="data:image/{ext};base64,{b64}" alt="{alt}" style="{style}">'
+
+
+def best_ranks_lists(df: pd.DataFrame, player_name: str):
+    """Récupération des meilleurs rangs atteints dans les 3 catégories de match par un joueur.
+
+    Args:
+        df (pd.DataFrame): Jeu de données.
+        player_name (str): Nom du joueur ("NOM Prénom").
+    """
+    # Copie du jeu de données
+    s = df.copy()
+    
+    # Classement dans l'ordre inversé
+    REVERS_CLASSEMENTS = CLASSEMENTS[::-1]
+
+    # Filtrage selon le type de match
+    s["type_match"] = s["type_match"].astype(str).str.upper()
+    s["match_type"] = (
+        s["type_match"].str[0].map({"S": "Simple", "D": "Double", "M": "Mixte"})
+    )
+
+    def split2(col: pd.Series):
+        col = col.fillna("").astype(str)
+        parts = col.str.split("/", n=1, expand=True)
+
+        c1 = parts[0].str.strip()
+        # get la deuxième colonne si elle existe, sinon valeurs NaN -> remplacées par ""
+        c2 = (
+            parts[1].fillna("").str.strip()
+            if parts.shape[1] > 1
+            else pd.Series("", index=col.index)
+        )
+
+        return c1, c2
+
+    # Variables
+    p1, p2 = split2(s["player"])
+    r1, r2 = split2(s["rank"])
+
+    player = pd.Series("", index=s.index)
+    rank = pd.Series("", index=s.index)
+
+    mask1 = p1.eq(player_name)
+    player[mask1] = p1[mask1]
+    rank[mask1] = r1[mask1]
+
+    mask2 = p2.eq(player_name)
+    player[mask2] = p2[mask2]
+    rank[mask2] = r2[mask2]
+
+    unit = pd.DataFrame(
+        {
+            "player": player,
+            "rank": rank,
+            "match_type": s["match_type"],
+        }
+    )
+
+    unit = unit[
+        (unit["player"] == player_name) & (unit["rank"].isin(REVERS_CLASSEMENTS))
+    ].copy()
+
+    unit["rank"] = unit["rank"].astype(
+        pd.CategoricalDtype(REVERS_CLASSEMENTS, ordered=True)
+    )
+    
+    best = unit.groupby(["player", "match_type"], as_index=False)["rank"].max()
+
+    list_simple = best.loc[best["match_type"] == "Simple", "rank"].astype(str).tolist()
+    list_double = best.loc[best["match_type"] == "Double", "rank"].astype(str).tolist()
+    list_mixte = best.loc[best["match_type"] == "Mixte", "rank"].astype(str).tolist()
+
+    # Si la liste est vide -> "..."
+    best_simple = list_simple[0] if len(list_simple) > 0 else "..."
+    best_double = list_double[0] if len(list_double) > 0 else "..."
+    best_mixte = list_mixte[0] if len(list_mixte) > 0 else "..."
+    
+    return best_simple, best_double, best_mixte
+
+def rank_stylizing(rank: str):
+    """Customisation de l'affichage du classement du joueur
+
+    Args:
+        rank (str): Classement officiel du joueur.
+    """
+    if rank == "NC":
+        color = "grey"
+    elif rank in ["P12", "P11", "P10"]:
+        color = "orange"
+    elif rank in ["D9", "D8", "D7"]:
+        color = "green"
+    elif rank in ["R6", "R5", "R4"]:
+        color = "blue"
+    elif rank in ["N3", "N2", "N1"]:
+        color = "red"
+    else:
+        color = "#979797"
+    #
+    return color
+
+def box_html_indiv(color: str, text: str) -> str:
+    return f"""
+    <div style="
+        width: 30px;
+        height: 30px;
+        background-color: {color};
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        flex: 0 0 auto;
+    ">
+        {text}
+    </div>
+    """
+
+def match_box_indiv(df: pd.DataFrame, type_match: str, line: int) -> str:
+    value = df[type_match].iloc[line]
+
+    # Choix de la couleur
+    if "-" in str(value):
+        color = "red"
+        text = str(value)
+    elif pd.isna(value):
+        color = "grey"
+        text = "..."
+    else:
+        color = "green"
+        text = f"+{value}"
+
+    return box_html_indiv(color, text)
+
+def box_html(color: str, text: str) -> str:
+    return f"""
+    <div style="
+        width: 30px;
+        height: 30px;
+        background-color: {color};
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        flex: 0 0 auto;
+    ">
+        {text}
+    </div>
+    """
+
+def match_box(df: pd.DataFrame, type_match: str, label: str) -> str:
+    rows = df.loc[df["type_match"] == type_match, "win"]
+
+    if rows.empty:
+        return box_html("grey", label)  # ou return "" si tu ne veux rien afficher
+
+    win = rows.iloc[0]
+
+    color = "green" if win == "aob" else "red"
+    return box_html(color, label)
+
+
+def matrix_color(df: pd.DataFrame, division: str):
+    # Formatage de la date
+    df["date"] = df["date"].dt.strftime("%d-%m-%Y")
+    #
+    if division in ["PR", "D3", "D2"]:
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: black;
+                    font-weight: bold;
+                '>
+                    {df.opponent_team.iloc[0]}
+                </div>
+
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SD1', 'SD1')}
+                {match_box(df, 'SD2', 'SD2')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1', 'MX1')}
+                {match_box(df, 'MX2', 'MX2')}
+            """
+
+        st.markdown(row_html, unsafe_allow_html=True)
+    #
+    if division == "D5":
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.opponent_team.iloc[0]}
+                </div>
+
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SD1', 'SD1')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1', 'MX1')}
+                {match_box(df, 'MX2', 'MX2')}
+            """
+
+        st.markdown(row_html, unsafe_allow_html=True)
+    #
+    if division == "H2":
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.opponent_team.iloc[0]}
+                </div>
+
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'SH3', 'SH3')}
+                {match_box(df, 'SH4', 'SH4')}
+                {match_box(df, 'DH1',  'DH1')}
+                {match_box(df, 'DH2',  'DH2')}
+            """
+
+        st.markdown(row_html, unsafe_allow_html=True)
+    #
+    if division == "V3":
+        row_html = f"""
+            <div style='
+                display: flex;
+                flex-wrap: nowrap;
+                align-items: center;
+                gap: 6px;
+                overflow-x: auto;
+                padding: 4px 0;
+            '>
+                <div style='
+                    flex: 0 0 70px;          /* largeur fixe de la "colonne" date+équipe */
+                    max-width: 180px;
+                    white-space: nowrap;      /* tout sur une ligne */
+                    overflow: hidden;         /* si trop long, on coupe */
+                    text-overflow: ellipsis;  /* ... à la fin */
+                    color: white;
+                    font-weight: bold;
+                '>
+                    {df.opponent_team.iloc[0]}
+                </div>
+
+                {match_box(df, 'SH1', 'SH1')}
+                {match_box(df, 'SH2', 'SH2')}
+                {match_box(df, 'DH',  'DH')}
+                {match_box(df, 'DD',  'DD')}
+                {match_box(df, 'MX1',  'MX1')}
+                {match_box(df, 'MX2',  'MX2')}
+            """
+
+        st.markdown(row_html, unsafe_allow_html=True)
+
+def safe_rate(wins: int, total: int, pct=True, ndigits=1):
+    """Calcul du pourcentage de victoire par match
+
+    Args:
+        wins (int): Nombre de victoires.
+        total (int): Nombre de matchs total.
+        pct (bool, optional): Résultat en pourcentage (True par défaut).
+        ndigits (int, optional): Nombre de décimale en sortie (1 par défaut).
+    """
+    if total == 0:
+        return "—" if pct else "0/0"  # à toi de choisir l’affichage
+    if pct:
+        return f"{round(100 * wins / total, ndigits)}%"
+    else:
+        return f"{wins}/{total}"
+
+def group_rate(df: pd.DataFrame, types: dict):
+    """Calcul du pourcentage de victoire par type de match (simple/double/mixte)
+
+    Args:
+        df (pd.DataFrame): Jeu de données.
+        types (dict): Liste des matchs possibles par type de match (ex: simple pour ["SD1","SH2",etc])
+    """
+    sub = df[df["type_match"].isin(types)]
+    total = len(sub)
+    wins = (sub["win"].str.lower() == "aob").sum()
+    return safe_rate(wins, total, pct=True, ndigits=0)  # % sans décimal
+
+def current_streak(results: list):
+    """Déterminer le type de streak (LOOSE/WIN)"""
+    if not results:  # si la liste est vide
+        return None, 0
+
+    last = results[-1]  # résultat du dernier match
+    streak = 0
+
+    for r in reversed(results):
+        if r == last:
+            streak += 1
+        else:
+            break
+
+    if last == "W":
+        return "win", streak
+    else:
+        return "loss", streak

@@ -1,5 +1,4 @@
 import streamlit as st
-import base64
 from pathlib import Path
 import utils
 
@@ -11,29 +10,6 @@ TABLE_INTERCLUB = utils.load_table(utils.env, "TABLE_INTERCLUB")
 ##################################################################
 #                         FONCTIONS                              #
 ##################################################################
-
-
-# Upload d'image en local
-def img_to_html(
-    rel_path_from_app_dir: str,
-    alt="image",
-    style="max-width:100%; height:auto; text-align: center",
-):
-    """Convertir une image au format .png/.jpg en une balise HTML
-
-    Args:
-        rel_path_from_app_dir (str): Chemin relatif au fichier image.
-        alt (str, optional): Type de fichie, ("image" par défaut).
-        style (str, optional): Style CSS additionnel (par défaut: "max-width:100%; height:auto; text-align: center").
-    """
-    # __file__ = app/pages/0_Accueil.py  → parents[1] = app/
-    app_dir = Path(__file__).resolve().parents[1]
-    path = (app_dir / rel_path_from_app_dir).resolve()  # ex: "assets/img/AOB_LOGO.jpg"
-    data = path.read_bytes()  # lève clairement si absent
-    ext = path.suffix.lstrip(".").lower()
-    b64 = base64.b64encode(data).decode()
-    return f'<img src="data:image/{ext};base64,{b64}" alt="{alt}" style="{style}">'
-
 
 # Définir V/D/E
 def match_output(division: str):
@@ -66,7 +42,7 @@ st.set_page_config(page_title="Accueil", layout="wide")
 # -- Image du club de badminton d'Orgères (35230)
 html = f"""
 <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-{img_to_html("app/assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
+{utils.img_to_html("app/assets/img/AOB_LOGO.jpg", alt="Logo", style="width:220px; border-radius:12px;")}
 </div>
 """
 st.markdown(html, unsafe_allow_html=True)
@@ -80,7 +56,7 @@ st.markdown(
 def show_teams(path):
     html = f"""
         <div style="display:flex; justify-content:center; padding:8px; border-radius:12px; margin-bottom:30px">
-        {img_to_html(path, alt="Logo", style="width:280px; border-radius:12px;")}
+        {utils.img_to_html(path, alt="Logo", style="width:280px; border-radius:12px;")}
         </div>
         """
     return html
