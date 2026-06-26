@@ -14,10 +14,13 @@ import numpy as np
 ##################################################################
 TABLE_INTERCLUB = utils.load_table(utils.env, "TABLE_INTERCLUB")
 
+BASE_DIR = Path(__file__).resolve().parents[1]
+ASSETS_TEAM_DIR = BASE_DIR / "assets" / "img" / "teams"
+ASSETS_DIR = BASE_DIR / "assets" / "img"
+
 ##################################################################
 #                         FONCTIONS                              #
 ##################################################################
-
 
 def winrate_piechart(value1:float, value2:float, value3:float, legend:list, unit:str="tot", key:str="default_id", colors:list=None, pct_list:list=None):
 
@@ -582,18 +585,18 @@ elif onglet == "Joueurs":
         l1_c1, l1_c2 = st.columns([7,3], gap="small")
         with l1_c1:
             # Photo du joueur
-            path_photo = Path(f"app/assets/img/{player['id_player']}.webp")
+            path_photo = Path(f"{ASSETS_DIR}{player['id_player']}.webp")
             if path_photo.is_file():
                 html = f"""
                 <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-                {utils.img_to_html(f"app/assets/img/{player['id_player']}.webp", alt="Logo", style="width:220px; border-radius:12px;")}
+                {utils.img_to_html(f"{ASSETS_DIR}/{player['id_player']}.webp", alt="Logo", style="width:220px; border-radius:12px;")}
                 </div>
                 """
                 st.markdown(html, unsafe_allow_html=True)
             else:
                 html = f"""
                 <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-                {utils.img_to_html(f"app/assets/img/{player['gender']}_nophoto.png", alt="Logo", style="width:220px; border-radius:12px;")}
+                {utils.img_to_html(f"{ASSETS_DIR}/{player['gender']}_nophoto.png", alt="Logo", style="width:220px; border-radius:12px;")}
                 </div>
                 """
                 st.markdown(html, unsafe_allow_html=True)
@@ -601,7 +604,7 @@ elif onglet == "Joueurs":
         with l1_c2:
             html = f"""
             <div style="display:flex; justify-content:center; padding:8px; border-radius:12px">
-            {utils.img_to_html(f"app/assets/img/teams/{player['division'][:2]}_logo.png", alt="Logo", style="width:100px; border-radius:12px;")}
+            {utils.img_to_html(f"{ASSETS_TEAM_DIR}/{player['division'][:2]}_logo.png", alt="Logo", style="width:100px; border-radius:12px;")}
             </div>
             """
             st.markdown(html, unsafe_allow_html=True)
@@ -1123,15 +1126,15 @@ elif onglet == "Équipes":
                 utils.kpi_card("Série", f"{utils.current_streak(matchs_list)[1]} {kpi_icon}", kpi_text)
 
     with c1:
-        team_card(1,"PR","app/assets/img/teams/PR_logo.png","Bad'A'Boum","REBEYROL Jeanne",team_list("PR"))
+        team_card(1,"PR",f"{ASSETS_TEAM_DIR}/PR_logo.png","Bad'A'Boum","REBEYROL Jeanne",team_list("PR"))
         #
-        team_card(2,"D5","app/assets/img/teams/D5_logo.png","AOB35-5","BARON Jerome",team_list("D5"))
+        team_card(2,"D5",f"{ASSETS_TEAM_DIR}/D5_logo.png","AOB35-5","BARON Jerome",team_list("D5"))
     with c2:
-        team_card(3,"D2","app/assets/img/teams/D2_logo.png","AOB35-2","BONNIER Julien",team_list("D2"))
+        team_card(3,"D2",f"{ASSETS_TEAM_DIR}/D2_logo.png","AOB35-2","BONNIER Julien",team_list("D2"))
         #
-        team_card(4,"H2","app/assets/img/teams/H2_logo.png","AOB35-1","JOUBIN Nicolas",team_list("H2"))
+        team_card(4,"H2",f"{ASSETS_TEAM_DIR}/H2_logo.png","AOB35-1","JOUBIN Nicolas",team_list("H2"))
     with c3:
-        team_card(5,"D3","app/assets/img/teams/D3_logo.png","AOB35-3","BARON Jerome",team_list("D3"))
+        team_card(5,"D3",f"{ASSETS_TEAM_DIR}/D3_logo.png","AOB35-3","BARON Jerome",team_list("D3"))
         #
-        team_card(6,"V3","app/assets/img/teams/V3_logo.png","Plumes grisonnantes","PIOC Matthieu",team_list("V3"))
+        team_card(6,"V3",f"{ASSETS_TEAM_DIR}/V3_logo.png","Plumes grisonnantes","PIOC Matthieu",team_list("V3"))
 
