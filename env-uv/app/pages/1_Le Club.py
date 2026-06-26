@@ -609,7 +609,7 @@ elif onglet == "Joueurs":
             """
             st.markdown(html, unsafe_allow_html=True)
             st.subheader(player["name"])
-            st.metric(f"{player['age']} ans ({'♂' if player['gender'] == 'H' else '♀'})", "")
+            st.metric(f"{player['division']} - {player['age']} ans ({'♂' if player['gender'] == 'H' else '♀'})", "")
         
         # Classements
         st.divider()
@@ -758,14 +758,37 @@ elif onglet == "Joueurs":
         row_col = st.container()
 
         with row_col:
-            btn_col, card_col = st.columns([0.8, 10], gap="small")
+            with stylable_container(
+                key=f"player_row_{player_id}",
+                css_styles="""
+                {
+                    width: 100%;
+                }
 
-            with btn_col:
-                st.markdown("""
-                <style>
+                div[data-testid="stHorizontalBlock"] {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
+                    align-items: stretch !important;
+                    gap: 8px !important;
+                }
+
+                div[data-testid="column"]:first-child {
+                    flex: 0 0 52px !important;
+                    width: 52px !important;
+                    min-width: 52px !important;
+                }
+
+                div[data-testid="column"]:nth-child(2) {
+                    flex: 1 1 auto !important;
+                    min-width: 0 !important;
+                }
+
                 div.stButton > button {
-                    margin-top: -7px;
+                    margin-top: 0px;
+                    height: 63px;
                     min-height: 63px;
+                    width: 100%;
                     border-radius: 14px;
                     background: #111827;
                     border: 1px solid #111827;
@@ -782,95 +805,105 @@ elif onglet == "Joueurs":
                     color: white;
                     transform: translateY(-1px);
                 }
-                </style>
-                """, unsafe_allow_html=True)
-                if st.button(
-                    "👤",
-                    key=f"open_player_{player_id}",
-                    use_container_width=True
-                ):
-                    show_player_modal(player_id)
 
-            with card_col:
-                html_card = f"""
-                <div style="
-                    padding: 12px 20px;
-                    border-radius: 14px;
-                    background: #FFFFFF;
-                    border: 1px solid #E5E7EB;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 12px;
-                    font-family: Arial, sans-serif;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-                ">
-                    <div>
-                        <div style="
-                            font-size: 16px;
-                            font-weight: 700;
-                            color: #111827;
-                        ">
-                            {joueur}
-                        </div>
+                iframe {
+                    width: 100% !important;
+                }
+                """
+            ):
+                btn_col, card_col = st.columns([0.8, 10], gap="small")
 
-                        <div style="
-                            margin-top: 4px;
-                            font-size: 13px;
-                            color: black;
-                        ">
-                            {team} · {"♂" if gender == "H" else "♀"} · {age} ans
-                        </div>
-                    </div>
+                with btn_col:
+                    if st.button(
+                        "👤",
+                        key=f"open_player_{player_id}",
+                        use_container_width=True
+                    ):
+                        show_player_modal(player_id)
 
+                with card_col:
+                    html_card = f"""
                     <div style="
+                        height: 63px;
+                        box-sizing: border-box;
+                        padding: 10px 14px;
+                        border-radius: 14px;
+                        background: #FFFFFF;
+                        border: 1px solid #E5E7EB;
                         display: flex;
-                        gap: 8px;
+                        justify-content: space-between;
                         align-items: center;
+                        gap: 10px;
+                        font-family: Arial, sans-serif;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+                        overflow: hidden;
                     ">
                         <div style="
-                            padding: 8px 10px;
-                            border-radius: 10px;
-                            background: {utils.rank_stylizing(ranks[0])};
-                            color: #FFFFFF;
-                            font-size: 13px;
-                            font-weight: 700;
-                            min-width: 34px;
-                            text-align: center;
+                            min-width: 0;
+                            flex: 1;
+                            overflow: hidden;
                         ">
-                            {ranks[0]}
+                            <div style="
+                                font-size: 16px;
+                                font-weight: 700;
+                                color: #111827;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            ">
+                                {joueur}
+                            </div>
                         </div>
 
                         <div style="
-                            padding: 8px 10px;
-                            border-radius: 10px;
-                            background: {utils.rank_stylizing(ranks[1])};
-                            color: #FFFFFF;
-                            font-size: 13px;
-                            font-weight: 700;
-                            min-width: 34px;
-                            text-align: center;
+                            display: flex;
+                            gap: 6px;
+                            align-items: center;
+                            flex-shrink: 0;
                         ">
-                            {ranks[1]}
-                        </div>
+                            <div style="
+                                padding: 7px 8px;
+                                border-radius: 10px;
+                                background: {utils.rank_stylizing(ranks[0])};
+                                color: #FFFFFF;
+                                font-size: 12px;
+                                font-weight: 700;
+                                min-width: 30px;
+                                text-align: center;
+                            ">
+                                {ranks[0]}
+                            </div>
 
-                        <div style="
-                            padding: 8px 10px;
-                            border-radius: 10px;
-                            background: {utils.rank_stylizing(ranks[2])};
-                            color: #FFFFFF;
-                            font-size: 13px;
-                            font-weight: 700;
-                            min-width: 34px;
-                            text-align: center;
-                        ">
-                            {ranks[2]}
+                            <div style="
+                                padding: 7px 8px;
+                                border-radius: 10px;
+                                background: {utils.rank_stylizing(ranks[1])};
+                                color: #FFFFFF;
+                                font-size: 12px;
+                                font-weight: 700;
+                                min-width: 30px;
+                                text-align: center;
+                            ">
+                                {ranks[1]}
+                            </div>
+
+                            <div style="
+                                padding: 7px 8px;
+                                border-radius: 10px;
+                                background: {utils.rank_stylizing(ranks[2])};
+                                color: #FFFFFF;
+                                font-size: 12px;
+                                font-weight: 700;
+                                min-width: 30px;
+                                text-align: center;
+                            ">
+                                {ranks[2]}
+                            </div>
                         </div>
                     </div>
-                </div>
-                """
+                    """
 
-                components.html(html_card, height=76)
+                    components.html(html_card, height=68)
 
 ##################################################################
 #                            EQUIPES                             #
