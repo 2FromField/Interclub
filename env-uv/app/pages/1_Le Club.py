@@ -756,7 +756,7 @@ elif onglet == "Joueurs":
         ]
 
         row_col = st.container()
-
+        
         with row_col:
             with stylable_container(
                 key=f"player_row_{player_id}",
@@ -811,11 +811,11 @@ elif onglet == "Joueurs":
                 }
                 """
             ):
-                btn_col, card_col = st.columns([0.8, 10], gap="small")
+                btn_col, card_col = st.columns([1, 50], gap="small")
 
                 with btn_col:
                     if st.button(
-                        "👤",
+                        "",
                         key=f"open_player_{player_id}",
                         use_container_width=True
                     ):
@@ -824,6 +824,7 @@ elif onglet == "Joueurs":
                 with card_col:
                     html_card = f"""
                     <div style="
+                        margin-top: -10px;
                         height: 63px;
                         box-sizing: border-box;
                         padding: 10px 14px;
