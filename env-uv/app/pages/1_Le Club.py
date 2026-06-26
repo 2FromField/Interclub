@@ -811,7 +811,7 @@ elif onglet == "Joueurs":
                 }
                 """
             ):
-                btn_col, card_col = st.columns([1, 50], gap="small")
+                btn_col, card_col = st.columns([44, 1000], gap="small")
 
                 with btn_col:
                     if st.button(
