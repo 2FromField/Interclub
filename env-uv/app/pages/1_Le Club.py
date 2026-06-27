@@ -5,7 +5,6 @@ import utils
 import plotly.graph_objects as go
 import pandas as pd
 import streamlit.components.v1 as components
-import urllib.parse
 from streamlit_extras.stylable_container import stylable_container
 import numpy as np
 
@@ -14,6 +13,7 @@ import numpy as np
 ##################################################################
 TABLE_INTERCLUB = utils.load_table(utils.env, "TABLE_INTERCLUB")
 
+# Chemin relatif vers les fichiers
 BASE_DIR = Path(__file__).resolve().parents[1]
 ASSETS_TEAM_DIR = BASE_DIR / "assets" / "img" / "teams"
 ASSETS_DIR = BASE_DIR / "assets" / "img"
@@ -23,7 +23,18 @@ ASSETS_DIR = BASE_DIR / "assets" / "img"
 ##################################################################
 
 def winrate_piechart(value1:float, value2:float, value3:float, legend:list, unit:str="tot", key:str="default_id", colors:list=None, pct_list:list=None):
-
+    """Graphique en camembert à 3 secteurs.
+    
+    Args:
+        value1 (float): valeur de la section n°1
+        value2 (float): valeur de la section n°2
+        value3 (float): valeur de la section n°3
+        legend (list[str]): légende de chaque secteur (dans l'ordre)
+        unit (str): type de données ('tot' ou 'pct') (default: 'tot')
+        key (str): clé d'identification du graphique (default: default_id)
+        colors (list[str]): couleurs des sections (default: None = vert/rouge/bleu)
+        pct_list (list[float]): valuers en pourcentage pour l'affichage (default: None)
+    """
     values = [value1, value2, value3]
     
     # Gestion des couleurs
@@ -89,6 +100,13 @@ def winrate_piechart(value1:float, value2:float, value3:float, legend:list, unit
 
 
 def actual_rank(df:pd.DataFrame, joueur:str, type:str="DD|DH"):
+    """Récupération du classement actuel d'un joueur.
+    
+    Args:
+        df (pd.DataFrame): jeu de données des matchs.
+        joueur (str): nom du joueur ciblé.
+        type (str): type de match ciblé (default: 'DD|DH').
+    """
     apply_df = df[(df["type_match"].str.contains(type, na=False)) & (df["player"].str.contains(joueur, na=False))].reset_index(drop=True)
     if not apply_df.empty:
         if type in ["DD|DH", "MX"]:
@@ -106,6 +124,19 @@ def actual_rank(df:pd.DataFrame, joueur:str, type:str="DD|DH"):
 def box_team(
     date, journey, key_id, aob_team, opponent_team, aob_score, opponent_score, box_style
 ):
+    """Affichage des résultats des matchs contre une équipe sous formats de carrés 
+    vert (victoire) ou rouge (défaite) avec le type de match à l'intérieur horodaté.
+    
+    Args:
+        date (str): date de la rencontre au format string YYYY/MM/dd.
+        journey (str): numéro de la journée de la rencontre.
+        key_id (int): identifiant unique du container streamlit.
+        aob_team (str): nom de l'équipe ciblée.
+        opponent_team (str): nom de l'équipe adverse.
+        aob_score (int): score final de l'AOB.
+        opponent_score (int): score final de l'adversaire.
+        box_style (str): style CSS ajoutés à la balise html.
+    """
     with stylable_container(key=f"box-vert-{key_id}", css_styles=box_style):
         # Ligne principale
         c1, c2 = st.columns([1, 9], gap="small")
@@ -146,6 +177,13 @@ def box_team(
                 value=False,
             )
 
+def img_to_base64(path):
+    """Convertion d'une image classique (jpeg/png/...) en base64.
+    
+    Args:
+        path (str): chemin vers l'image.
+    """
+    return base64.b64encode(Path(path).read_bytes()).decode()
 
 
 ##################################################################
@@ -236,14 +274,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-def img_to_base64(path):
-    return base64.b64encode(Path(path).read_bytes()).decode()
-
 ##################################################################
 #                            LAYOUT                              #
 ##################################################################
 st.set_page_config(page_title="Statistiques", layout="wide")
 
+# Navbar horizontale
 onglet = st.segmented_control(
     label="Navigation",
     options=["Vue générale", "Joueurs", "Équipes"],
@@ -257,6 +293,8 @@ st.divider()
 ##################################################################
 #                            GENERAL                             #
 ##################################################################
+
+# Récupération des données et assemblage des tables
 m_ic = utils.TABLE_MATCHS.merge(
     TABLE_INTERCLUB[["id", "date", "division", "aob_team", "opponent_team"]],
     left_on="id",
@@ -293,6 +331,7 @@ m_ic["rank"] = utils.join_if_two(m_ic["aob_rank_p1"], m_ic["aob_rank_p2"])
 p1_txt = m_ic["aob_pts_p1"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
 p2_txt = m_ic["aob_pts_p2"].astype("Int64").astype(str).replace("<NA>", "", regex=False)
 m_ic["pts"] = utils.join_if_two(p1_txt, p2_txt)
+
 # 5) Sélection finale - Dataframe utilisable
 result = m_ic[
     [
@@ -312,9 +351,11 @@ result = m_ic[
         "opponent_grind",
     ]
 ].reset_index(drop=True)
+
 # Copie du dataframe
 df = result.copy()
 
+# Navigation dans l'onglet "Vue générale"
 if onglet == "Vue générale":
     #
     players = df["player"].str.split("/")
@@ -387,7 +428,6 @@ if onglet == "Vue générale":
             pts_m = f"+{pts_m}"
         #
         utils.kpi_card("Point Eater", pts_eater["player"][0], f"{pts_s} / {pts_d} / {pts_m}")
-        # utils.kpi_card("Nombre de compétiteurs", f'154', "94 ♂ / 60 ♀")
     with l1_c2:
         # Compter les victoires dans l'ordre chronologique
         df_long = df_long.sort_values(["player", "date"])
@@ -420,7 +460,6 @@ if onglet == "Vue générale":
             df_win_streak["player"][0],
             f"🔥{df_win_streak['best_win_streak'][0]}",
         )
-        # winrate_piechart(70.5, 8.5, 21.0)
     with l1_c3:
         # Nombre de match total joués par joueur
         df_match_count = (
@@ -575,6 +614,12 @@ elif onglet == "Joueurs":
 
     @st.dialog("Fiche joueur")
     def show_player_modal(player_id):
+        """Affichage de la popup d'un joueur suite au clic sur le bouton à côté
+        de la carte d'un joueur spécifique.
+        
+        Args:
+            player_id (str): division de l'équipe.
+        """
         player = players.loc[players["id_player"] == player_id].iloc[0]
         
         l1_c1, l1_c2 = st.columns([7,3], gap="small")
@@ -910,8 +955,13 @@ elif onglet == "Équipes":
     c1, c2, c3 = st.columns([1, 1, 1], gap="small")
     
     def team_list(team: str):
-                    mask = players["division"].str.contains(team, na=False)
-                    return players.loc[mask, "name"].tolist()
+        """Récupération de l'effectif d'une équipe sous la forme d'une liste de string.
+        
+        Args:
+            team (str): division de l'équipe.
+        """
+        mask = players["division"].str.contains(team, na=False)
+        return players.loc[mask, "name"].tolist()
 
     def team_card(
         key_id: str,
@@ -921,6 +971,17 @@ elif onglet == "Équipes":
         captain: str,
         players: list[str],
     ):
+        """Cartes des équipes d'interclub affichant les informations relatives à celle-ci telles
+        que son effectif, ses résultats sur les différentes rencontres et les statistiques inhérentes
+
+        Args:
+            key_id (int): id assigné à la carte.
+            team (str): division de l'équipe.
+            logo_path (str): chemin relatif vers le logo de l'équipe.
+            team_name (str): nom de l'équipe.
+            captain (str): nom et prénom du capitaine de l'équipe
+            players (list[str]): liste des joueurs composant l'effectif. 
+        """
         with stylable_container(
             key=f"team_card_{key_id}",
             css_styles="""
@@ -974,7 +1035,7 @@ elif onglet == "Équipes":
             st.markdown(
                 """
                 <div style="
-                    margin-top: 10px;
+                    margin-top: 15px;
                     padding-top: 14px;
                     border-top: 1px solid #e5e7eb;
                 "></div>
