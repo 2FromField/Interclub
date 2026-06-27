@@ -66,7 +66,6 @@ def winrate_piechart(value1:float, value2:float, value3:float, legend:list, unit
 
     fig.update_layout(
         title=dict(
-            text="Répartition des résultats",
             x=0.5,
             font=dict(size=24, color="#111827")
         ),
@@ -772,7 +771,7 @@ elif onglet == "Joueurs":
                     flex-direction: row !important;
                     flex-wrap: nowrap !important;
                     align-items: center !important;
-                    gap: 6px !important;
+                    gap: 0px !important;
                     width: 100% !important;
                     max-width: 100% !important;
                     overflow-x: hidden !important;
@@ -784,6 +783,7 @@ elif onglet == "Joueurs":
                     min-width: 38px !important;
                     max-width: calc(10% - 3px) !important;
                     padding: 0 !important;
+                    gap: 0px !important;
                 }
 
                 div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) {
@@ -791,8 +791,9 @@ elif onglet == "Joueurs":
                     width: calc(90% - 3px) !important;
                     min-width: 0 !important;
                     max-width: calc(90% - 3px) !important;
-                    padding: 0 !important;
+                    padding: 4 !important;
                     overflow-x: hidden !important;
+                    gap: 0px !important;
                 }
 
                 div.stButton {
@@ -827,7 +828,7 @@ elif onglet == "Joueurs":
                 }
                 """
             ):
-                btn_col, card_col = st.columns([1, 9], gap="small")
+                btn_col, card_col = st.columns([1, 90], gap="small")
 
                 with btn_col:
                     if st.button(
