@@ -65,10 +65,6 @@ def winrate_piechart(value1:float, value2:float, value3:float, legend:list, unit
     )
 
     fig.update_layout(
-        title=dict(
-            x=0.5,
-            font=dict(size=24, color="#111827")
-        ),
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -754,176 +750,157 @@ elif onglet == "Joueurs":
             actual_rank(filtered_df, joueur, "MX"),
         ]
 
-        row_col = st.container()
+        with stylable_container(
+            key=f"player_row_{player_id}",
+            css_styles="""
+            {
+                position: relative;
+                width: 100%;
+                max-width: 100%;
+                min-height: 67px;
+                overflow: hidden;
+            }
 
-        with row_col:
-            with stylable_container(
-                key=f"player_row_{player_id}",
-                css_styles="""
-                {
-                    width: 100%;
-                    max-width: 100%;
-                    overflow-x: hidden;
-                }
+            /* Bouton Streamlit à gauche */
+            div.stButton {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 5% !important;
+                min-width: 38px !important;
+                height: 63px !important;
+                z-index: 2 !important;
+            }
 
-                div[data-testid="stHorizontalBlock"] {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    flex-wrap: nowrap !important;
-                    align-items: center !important;
-                    gap: 0px !important;
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    overflow-x: hidden !important;
-                }
+            div.stButton > button {
+                width: 100% !important;
+                height: 63px !important;
+                min-height: 63px !important;
+                padding: 0 !important;
+                border-radius: 14px !important;
+                background: #111827 !important;
+                border: 1px solid #111827 !important;
+                color: white !important;
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
+                transition: all 0.15s ease !important;
+            }
 
-                div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) {
-                    flex: 0 0 calc(10% - 3px) !important;
-                    width: calc(10% - 3px) !important;
-                    min-width: 38px !important;
-                    max-width: calc(10% - 3px) !important;
-                    padding: 0 !important;
-                    gap: 0px !important;
-                }
+            div.stButton > button:hover {
+                background: #374151 !important;
+                border-color: #374151 !important;
+                color: white !important;
+                transform: translateY(-1px);
+            }
 
-                div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) {
-                    flex: 0 0 calc(90% - 3px) !important;
-                    width: calc(90% - 3px) !important;
-                    min-width: 0 !important;
-                    max-width: calc(90% - 3px) !important;
-                    padding: 4 !important;
-                    overflow-x: hidden !important;
-                    gap: 0px !important;
-                }
-
-                div.stButton {
-                    width: 100% !important;
-                }
-
-                div.stButton > button {
-                    width: 100% !important;
-                    min-width: 0 !important;
-                    padding: 0 !important;
-                    border-radius: 14px;
-                    background: #111827;
-                    border: 1px solid #111827;
-                    color: white;
-                    font-size: 18px;
-                    font-weight: 700;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-                    transition: all 0.15s ease;
-                }
-
-                div.stButton > button:hover {
-                    background: #374151;
-                    border-color: #374151;
-                    color: white;
-                    transform: translateY(-1px);
-                }
-
-                iframe {
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    overflow-x: hidden !important;
-                }
-                """
+            /* Card HTML à droite */
+            iframe {
+                position: absolute !important;
+                left: calc(5% + 6px) !important;
+                top: 0 !important;
+                width: calc(95% - 6px) !important;
+                max-width: calc(95% - 6px) !important;
+                height: 67px !important;
+                overflow: hidden !important;
+            }
+            """
+        ):
+            if st.button(
+                "",
+                key=f"open_player_{player_id}",
+                use_container_width=True
             ):
-                btn_col, card_col = st.columns([1, 90], gap="small")
+                show_player_modal(player_id)
 
-                with btn_col:
-                    if st.button(
-                        "",
-                        key=f"open_player_{player_id}",
-                        use_container_width=True
-                    ):
-                        show_player_modal(player_id)
-
-                with card_col:
-                    html_card = f"""
+            html_card = f"""
+            <div style="
+                width: 100%;
+                max-width: 100%;
+                height: 63px;
+                box-sizing: border-box;
+                padding: 10px 12px;
+                border-radius: 14px;
+                background: #FFFFFF;
+                border: 1px solid #E5E7EB;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+                overflow: hidden;
+                margin-top: -7px;
+            ">
+                <div style="
+                    min-width: 0;
+                    flex: 1 1 auto;
+                    overflow: hidden;
+                ">
                     <div style="
-                        width: 100%;
-                        box-sizing: border-box;
-                        padding: 10px 12px;
-                        border-radius: 14px;
-                        background: #FFFFFF;
-                        border: 1px solid #E5E7EB;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        gap: 8px;
-                        font-family: Arial, sans-serif;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #111827;
+                        white-space: nowrap;
                         overflow: hidden;
+                        text-overflow: ellipsis;
                     ">
-                        <div style="
-                            min-width: 0;
-                            flex: 1 1 auto;
-                            overflow: hidden;
-                        ">
-                            <div style="
-                                font-size: 15px;
-                                font-weight: 700;
-                                color: #111827;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            ">
-                                {joueur}
-                            </div>
-                        </div>
-
-                        <div style="
-                            display: flex;
-                            gap: 5px;
-                            align-items: center;
-                            flex-shrink: 0;
-                        ">
-                            <div style="
-                                padding: 6px 7px;
-                                border-radius: 9px;
-                                background: {utils.rank_stylizing(ranks[0])};
-                                color: #FFFFFF;
-                                font-size: 11px;
-                                font-weight: 700;
-                                min-width: 28px;
-                                text-align: center;
-                                box-sizing: border-box;
-                            ">
-                                {ranks[0]}
-                            </div>
-
-                            <div style="
-                                padding: 6px 7px;
-                                border-radius: 9px;
-                                background: {utils.rank_stylizing(ranks[1])};
-                                color: #FFFFFF;
-                                font-size: 11px;
-                                font-weight: 700;
-                                min-width: 28px;
-                                text-align: center;
-                                box-sizing: border-box;
-                            ">
-                                {ranks[1]}
-                            </div>
-
-                            <div style="
-                                padding: 6px 7px;
-                                border-radius: 9px;
-                                background: {utils.rank_stylizing(ranks[2])};
-                                color: #FFFFFF;
-                                font-size: 11px;
-                                font-weight: 700;
-                                min-width: 28px;
-                                text-align: center;
-                                box-sizing: border-box;
-                            ">
-                                {ranks[2]}
-                            </div>
-                        </div>
+                        {joueur}
                     </div>
-                    """
+                </div>
 
-                    components.html(html_card, height=67)
+                <div style="
+                    display: flex;
+                    gap: 5px;
+                    align-items: center;
+                    flex-shrink: 0;
+                ">
+                    <div style="
+                        padding: 6px 7px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[0])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                        box-sizing: border-box;
+                    ">
+                        {ranks[0]}
+                    </div>
+
+                    <div style="
+                        padding: 6px 7px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[1])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                        box-sizing: border-box;
+                    ">
+                        {ranks[1]}
+                    </div>
+
+                    <div style="
+                        padding: 6px 7px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[2])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                        box-sizing: border-box;
+                    ">
+                        {ranks[2]}
+                    </div>
+                </div>
+            </div>
+            """
+
+            components.html(html_card, height=67)
 
 ##################################################################
 #                            EQUIPES                             #
