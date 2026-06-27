@@ -800,8 +800,6 @@ elif onglet == "Joueurs":
                 }
 
                 div.stButton > button {
-                    height: 63px;
-                    min-height: 63px;
                     width: 100% !important;
                     min-width: 0 !important;
                     padding: 0 !important;
@@ -833,7 +831,7 @@ elif onglet == "Joueurs":
 
                 with btn_col:
                     if st.button(
-                        "👤",
+                        "",
                         key=f"open_player_{player_id}",
                         use_container_width=True
                     ):
@@ -843,8 +841,6 @@ elif onglet == "Joueurs":
                     html_card = f"""
                     <div style="
                         width: 100%;
-                        max-width: 100%;
-                        height: 63px;
                         box-sizing: border-box;
                         padding: 10px 12px;
                         border-radius: 14px;
