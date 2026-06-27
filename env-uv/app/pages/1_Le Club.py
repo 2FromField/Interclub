@@ -756,44 +756,60 @@ elif onglet == "Joueurs":
         ]
 
         row_col = st.container()
-        
+
         with row_col:
             with stylable_container(
                 key=f"player_row_{player_id}",
                 css_styles="""
                 {
                     width: 100%;
+                    max-width: 100%;
+                    overflow-x: hidden;
                 }
 
                 div[data-testid="stHorizontalBlock"] {
                     display: flex !important;
                     flex-direction: row !important;
                     flex-wrap: nowrap !important;
-                    align-items: stretch !important;
-                    gap: 8px !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    overflow-x: hidden !important;
                 }
 
-                div[data-testid="column"]:first-child {
-                    flex: 0 0 52px !important;
-                    width: 52px !important;
-                    min-width: 52px !important;
+                div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(1) {
+                    flex: 0 0 calc(10% - 3px) !important;
+                    width: calc(10% - 3px) !important;
+                    min-width: 38px !important;
+                    max-width: calc(10% - 3px) !important;
+                    padding: 0 !important;
                 }
 
-                div[data-testid="column"]:nth-child(2) {
-                    flex: 1 1 auto !important;
+                div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-of-type(2) {
+                    flex: 0 0 calc(90% - 3px) !important;
+                    width: calc(90% - 3px) !important;
                     min-width: 0 !important;
+                    max-width: calc(90% - 3px) !important;
+                    padding: 0 !important;
+                    overflow-x: hidden !important;
+                }
+
+                div.stButton {
+                    width: 100% !important;
                 }
 
                 div.stButton > button {
-                    margin-top: 0px;
                     height: 63px;
                     min-height: 63px;
-                    width: 100%;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                    padding: 0 !important;
                     border-radius: 14px;
                     background: #111827;
                     border: 1px solid #111827;
                     color: white;
-                    font-size: 20px;
+                    font-size: 18px;
                     font-weight: 700;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.04);
                     transition: all 0.15s ease;
@@ -808,14 +824,16 @@ elif onglet == "Joueurs":
 
                 iframe {
                     width: 100% !important;
+                    max-width: 100% !important;
+                    overflow-x: hidden !important;
                 }
                 """
             ):
-                btn_col, card_col = st.columns([44, 1000], gap="small")
+                btn_col, card_col = st.columns([1, 9], gap="small")
 
                 with btn_col:
                     if st.button(
-                        "",
+                        "👤",
                         key=f"open_player_{player_id}",
                         use_container_width=True
                     ):
@@ -824,28 +842,29 @@ elif onglet == "Joueurs":
                 with card_col:
                     html_card = f"""
                     <div style="
-                        margin-top: -10px;
+                        width: 100%;
+                        max-width: 100%;
                         height: 63px;
                         box-sizing: border-box;
-                        padding: 10px 14px;
+                        padding: 10px 12px;
                         border-radius: 14px;
                         background: #FFFFFF;
                         border: 1px solid #E5E7EB;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        gap: 10px;
+                        gap: 8px;
                         font-family: Arial, sans-serif;
                         box-shadow: 0 2px 10px rgba(0,0,0,0.04);
                         overflow: hidden;
                     ">
                         <div style="
                             min-width: 0;
-                            flex: 1;
+                            flex: 1 1 auto;
                             overflow: hidden;
                         ">
                             <div style="
-                                font-size: 16px;
+                                font-size: 15px;
                                 font-weight: 700;
                                 color: #111827;
                                 white-space: nowrap;
@@ -858,45 +877,48 @@ elif onglet == "Joueurs":
 
                         <div style="
                             display: flex;
-                            gap: 6px;
+                            gap: 5px;
                             align-items: center;
                             flex-shrink: 0;
                         ">
                             <div style="
-                                padding: 7px 8px;
-                                border-radius: 10px;
+                                padding: 6px 7px;
+                                border-radius: 9px;
                                 background: {utils.rank_stylizing(ranks[0])};
                                 color: #FFFFFF;
-                                font-size: 12px;
+                                font-size: 11px;
                                 font-weight: 700;
-                                min-width: 30px;
+                                min-width: 28px;
                                 text-align: center;
+                                box-sizing: border-box;
                             ">
                                 {ranks[0]}
                             </div>
 
                             <div style="
-                                padding: 7px 8px;
-                                border-radius: 10px;
+                                padding: 6px 7px;
+                                border-radius: 9px;
                                 background: {utils.rank_stylizing(ranks[1])};
                                 color: #FFFFFF;
-                                font-size: 12px;
+                                font-size: 11px;
                                 font-weight: 700;
-                                min-width: 30px;
+                                min-width: 28px;
                                 text-align: center;
+                                box-sizing: border-box;
                             ">
                                 {ranks[1]}
                             </div>
 
                             <div style="
-                                padding: 7px 8px;
-                                border-radius: 10px;
+                                padding: 6px 7px;
+                                border-radius: 9px;
                                 background: {utils.rank_stylizing(ranks[2])};
                                 color: #FFFFFF;
-                                font-size: 12px;
+                                font-size: 11px;
                                 font-weight: 700;
-                                min-width: 30px;
+                                min-width: 28px;
                                 text-align: center;
+                                box-sizing: border-box;
                             ">
                                 {ranks[2]}
                             </div>
@@ -904,7 +926,7 @@ elif onglet == "Joueurs":
                     </div>
                     """
 
-                    components.html(html_card, height=68)
+                    components.html(html_card, height=67)
 
 ##################################################################
 #                            EQUIPES                             #
