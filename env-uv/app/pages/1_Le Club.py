@@ -951,16 +951,7 @@ elif onglet == "Équipes":
                         color: #111827;
                         line-height: 1.2;
                     ">
-                        {team}
-                    </div>
-
-                    <div style="
-                        margin-top: 6px;
-                        font-size: 13px;
-                        line-height: 1.4;
-                        color: #4b5563;
-                    ">
-                        Nom d'équipe : {team_name}
+                        {team_name} ({team})
                     </div>
 
                     <div style="
