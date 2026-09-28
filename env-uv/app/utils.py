@@ -70,7 +70,7 @@ def to_native(v):
 
 
 @st.cache_data
-def load_table(env: str, table: str) -> pd.DataFrame:
+def load_table(env: str, table: str, saison:str=None) -> pd.DataFrame:
     """Chargement des données dev/prod, mis en cache par Streamlit."""
     if env == "prod":
         # SHEET_ID vient de .streamlit/secrets.toml, section [prod]
@@ -80,22 +80,52 @@ def load_table(env: str, table: str) -> pd.DataFrame:
         ws = _ws(sheet_id, table)  # ou autre nom d’onglet
         rows = ws.get_all_records()  # suppose 1re ligne = en-têtes
         df = pd.DataFrame(rows)
+        if saison != "Toutes les saisons":
+            if saison not in (None, "Toutes les saisons") and "saison" in df.columns:
+                df = df[df["saison"].astype(str) == saison]
 
     elif env == "dev":
         # TABLE_INTERCLUB / TABLE_MATCHS / TABLE_PLAYERS viennent de [dev]
         paths = st.secrets["dev"]
         df = pd.read_csv(paths[table], sep=";")
+        if saison != "Toutes les saisons":
+            if saison not in (None, "Toutes les saisons") and "saison" in df.columns:
+                df = df[df["saison"].astype(str) == saison]
 
     else:
         raise ValueError(f"Environnement inconnu : {env}")
 
     return df
 
+def charger_tables(saison):
+    return (
+        load_table(env, "TABLE_INTERCLUB", saison),
+        load_table(env, "TABLE_MATCHS", saison),
+        load_table(env, "TABLE_PLAYERS"),
+    )
 
-# -- Téléchargement des données
-TABLE_INTERCLUB = load_table(env, "TABLE_INTERCLUB")
-TABLE_MATCHS = load_table(env, "TABLE_MATCHS")
-TABLE_PLAYERS = load_table(env, "TABLE_PLAYERS")
+def selecteur_saison():
+    saisons = ["Toutes les saisons", "2025-26", "2026-27"]
+    valeur_key = "saison_selectionnee"
+    widget_key = "_saison_widget"
+
+    if st.session_state.get(valeur_key) not in saisons:
+        st.session_state[valeur_key] = saisons[0]
+
+    # Recharge dans le widget la valeur conservée entre les pages
+    st.session_state[widget_key] = st.session_state[valeur_key]
+
+    def memoriser():
+        st.session_state[valeur_key] = st.session_state[widget_key]
+
+    st.sidebar.selectbox(
+        "Saison",
+        saisons,
+        key=widget_key,
+        on_change=memoriser,
+    )
+
+    return st.session_state[valeur_key]
 
 
 def append_row_sheet(row: dict, worksheet="Feuille1"):
