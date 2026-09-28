@@ -5,7 +5,8 @@ import utils
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
-TABLE_INTERCLUB = utils.load_table(utils.env, "TABLE_INTERCLUB")
+saison = utils.selecteur_saison() # Choix de la saison
+TABLE_INTERCLUB, TABLE_MATCHS, TABLE_PLAYERS = utils.charger_tables(saison)
 
 ##################################################################
 #                         FONCTIONS                              #
@@ -47,28 +48,31 @@ html = f"""
 """
 st.markdown(html, unsafe_allow_html=True)
 st.markdown(
-    f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON 2025/26</div>",
+    f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON {saison}</div>",
     unsafe_allow_html=True,
 )
 
 
 # -- Images des équipes dans les différentes divisions de la saison 2025/26
 def show_teams(path):
-    html = f"""
-        <div style="display:flex; justify-content:center; padding:8px; border-radius:12px; margin-bottom:30px">
-        {utils.img_to_html(path, alt="Logo", style="width:280px; border-radius:12px;")}
-        </div>
-        """
+    if not Path(path).exists():
+        html = f""
+    else:
+        html = f"""
+            <div style="display:flex; justify-content:center; padding:8px; border-radius:12px; margin-bottom:30px">
+            {utils.img_to_html(path, alt="Logo", style="width:280px; border-radius:12px;")}
+            </div>
+            """
     return html
 
 
 c1, c2, c3 = st.columns(3, gap="small")
 with c1:
-    st.markdown(show_teams("app/assets/img/PR.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("app/assets/img/D5.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/PR.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/D5.jpg"), unsafe_allow_html=True)
 with c2:
-    st.markdown(show_teams("app/assets/img/D2.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("app/assets/img/H2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/D2.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/H2.jpg"), unsafe_allow_html=True)
 with c3:
-    st.markdown(show_teams("app/assets/img/D3.jpg"), unsafe_allow_html=True)
-    st.markdown(show_teams("app/assets/img/V3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/D3.jpg"), unsafe_allow_html=True)
+    st.markdown(show_teams(f"app/assets/img/teams/{saison}/V3.jpg"), unsafe_allow_html=True)
