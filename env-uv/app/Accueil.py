@@ -47,10 +47,17 @@ html = f"""
 </div>
 """
 st.markdown(html, unsafe_allow_html=True)
-st.markdown(
-    f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON {saison}</div>",
-    unsafe_allow_html=True,
-)
+
+if saison != "Toutes les saisons":
+    st.markdown(
+        f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>SAISON {saison}</div>",
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown(
+        f"<div style='font-size:1rem; text-align:center; margin-bottom: 40px'>TOUTES LES SAISONS</div>",
+        unsafe_allow_html=True,
+    )
 
 
 # -- Images des équipes dans les différentes divisions de la saison 2025/26
