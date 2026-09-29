@@ -2,6 +2,8 @@ from datetime import date
 import streamlit as st
 import utils
 from auth import check_record_password
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # 🔒 Accès administrateur
 if not check_record_password(page_key="admin", secret_path="admin.password"):
@@ -10,13 +12,6 @@ if not check_record_password(page_key="admin", secret_path="admin.password"):
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
-aujourdhui = datetime.now(ZoneInfo("Europe/Paris")).date()
-annee_debut = aujourdhui.year if aujourdhui.month >= 8 else aujourdhui.year - 1
-
-saison = f"{annee_debut}-{(annee_debut + 1) % 100:02d}"
 
 # --- Accès aux tables
 INTERCLUB_TABLE, MATCHS_TABLE, PLAYERS_TABLE = utils.charger_tables("Toutes les saisons")
@@ -214,6 +209,8 @@ with st.form("match_record"):
     col2, col3 = st.columns(2)
     with col2:
         date_match = st.date_input("Date", value=date.today(), key="date")
+        annee_debut = date_match.year if date_match.month >= 8 else date_match.year - 1
+        saison = f"{annee_debut}-{(annee_debut + 1) % 100:02d}"
     with col3:
         journey = st.number_input(
             "Journée", min_value=1, step=1, format="%d", key="journey"
