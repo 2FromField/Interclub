@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import utils
 
+st.set_page_config(page_title="Historique", layout="wide")
+
 ##################################################################
 #                        VARIABLES                               #
 ##################################################################
@@ -47,8 +49,6 @@ def filter_by_result(
 ##################################################################
 #                           LAYOUT                               #
 ##################################################################
-st.set_page_config(page_title="Historique", layout="wide")
-
 c1, c2, c3 = st.columns([3, 1, 1], gap="small")
 with c1:
     # -- Dropdown de filtrage d'équipe
