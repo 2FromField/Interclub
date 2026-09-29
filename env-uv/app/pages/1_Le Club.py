@@ -8,6 +8,8 @@ import streamlit.components.v1 as components
 from streamlit_extras.stylable_container import stylable_container
 import numpy as np
 
+st.set_page_config(page_title="Statistiques", layout="wide")
+
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
@@ -279,8 +281,6 @@ st.markdown(
 ##################################################################
 #                            LAYOUT                              #
 ##################################################################
-st.set_page_config(page_title="Statistiques", layout="wide")
-
 # Navbar horizontale
 onglet = st.segmented_control(
     label="Navigation",
@@ -1223,4 +1223,3 @@ else:
             team_card(5,"D3",f"{ASSETS_TEAM_DIR}/D3_logo.png","AOB35-3","BARON Jerome",team_list("D3"))
             #
             team_card(6,"V3",f"{ASSETS_TEAM_DIR}/V3_logo.png","Plumes grisonnantes","PIOC Matthieu",team_list("V3"))
-

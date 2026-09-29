@@ -2,6 +2,8 @@ import streamlit as st
 from pathlib import Path
 import utils
 
+st.set_page_config(page_title="Accueil", layout="wide")
+
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
@@ -37,8 +39,6 @@ def match_output(division: str):
 ##################################################################
 #                           LAYOUT                               #
 ##################################################################
-
-st.set_page_config(page_title="Accueil", layout="wide")
 
 # -- Image du club de badminton d'Orgères (35230)
 html = f"""
