@@ -614,7 +614,10 @@ else:
 
     elif onglet == "Joueurs":
         filtered_df = df[["id", "aob_player_id", "type_match", "player", "rank", "date", "opponent_team", "aob_grind"]]
-        joueurs = players["name"].unique().tolist()
+        joueurs = sorted(
+            players["name"].dropna().unique(),
+            key=lambda nom: str(nom).casefold(),
+        )
 
         @st.dialog("Fiche joueur")
         def show_player_modal(player_id:int, ranks:list):

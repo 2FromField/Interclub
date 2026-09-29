@@ -1385,5 +1385,5 @@ def rank_progression_span(table_match: pd.DataFrame, player_id, discipline: str)
         f'<span style="display:inline-flex;align-items:center;'
         f'justify-content:center;width:16px;height:16px;border-radius:50%;'
         f'background:{color};color:white;font-size:12px;font-weight:700;'
-        f'line-height:16px;text-align:center;margin-top:8px;margin-left:-7px">{symbol}</span>'
+        f'line-height:16px;text-align:center;margin-top:7px;margin-left:-7px">{symbol}</span>'
     )
