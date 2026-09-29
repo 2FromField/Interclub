@@ -342,9 +342,10 @@ if submitted:
     else:
         # Mise à jour de la table MATCHS
         try:
+            id_match = MATCHS_TABLE["id"].max() + 1
             if categorie == "H2":
                 sh1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -370,7 +371,7 @@ if submitted:
                 }
                 #
                 sh2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH2",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -396,7 +397,7 @@ if submitted:
                 }
                 #
                 sh3_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH3",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -422,7 +423,7 @@ if submitted:
                 }
                 #
                 sh4_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH4",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -448,7 +449,7 @@ if submitted:
                 }
                 #
                 dh1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DH1",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh1_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh1_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dh1_opponent1_name")}/{st.session_state.get("dh1_opponent2_name")}',
@@ -470,7 +471,7 @@ if submitted:
                 }
                 #
                 dh2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DH2",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh2_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh2_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dh2_opponent1_name")}/{st.session_state.get("dh2_opponent2_name")}',
@@ -497,7 +498,7 @@ if submitted:
             #
             elif categorie == "D5":
                 sh1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -523,7 +524,7 @@ if submitted:
                 }
                 #
                 sh2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH2",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -549,7 +550,7 @@ if submitted:
                 }
                 #
                 sd1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SD1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -575,7 +576,7 @@ if submitted:
                 }
                 #
                 dh_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DH",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dh_opponent1_name")}/{st.session_state.get("dh_opponent2_name")}',
@@ -597,7 +598,7 @@ if submitted:
                 }
                 #
                 dd_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DD",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dd_opponent1_name")}/{st.session_state.get("dd_opponent2_name")}',
@@ -619,7 +620,7 @@ if submitted:
                 }
                 #
                 mx1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX1",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx1_opponent1_name")}/{st.session_state.get("mx1_opponent2_name")}',
@@ -641,7 +642,7 @@ if submitted:
                 }
                 #
                 mx2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX2",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx2_opponent1_name")}/{st.session_state.get("mx2_opponent2_name")}',
@@ -668,7 +669,7 @@ if submitted:
             #
             elif categorie == "V3":
                 sh1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -694,7 +695,7 @@ if submitted:
                 }
                 #
                 sh2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH2",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -720,7 +721,7 @@ if submitted:
                 }
                 #
                 dh_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DH",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dh_opponent1_name")}/{st.session_state.get("dh_opponent2_name")}',
@@ -742,7 +743,7 @@ if submitted:
                 }
                 #
                 dd_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DD",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dd_opponent1_name")}/{st.session_state.get("dd_opponent2_name")}',
@@ -764,7 +765,7 @@ if submitted:
                 }
                 #
                 mx1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX1",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx1_opponent1_name")}/{st.session_state.get("mx1_opponent2_name")}',
@@ -786,7 +787,7 @@ if submitted:
                 }
                 #
                 mx2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX2",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx2_opponent1_name")}/{st.session_state.get("mx2_opponent2_name")}',
@@ -813,7 +814,7 @@ if submitted:
             #
             else:
                 sh1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -839,7 +840,7 @@ if submitted:
                 }
                 #
                 sh2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SH2",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -865,7 +866,7 @@ if submitted:
                 }
                 #
                 sd1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SD1",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -891,7 +892,7 @@ if submitted:
                 }
                 #
                 sd2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "SD2",
                     "aob_player_id": str(
                         utils.get_player_id(
@@ -917,7 +918,7 @@ if submitted:
                 }
                 #
                 dh_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DH",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dh_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dh_opponent1_name")}/{st.session_state.get("dh_opponent2_name")}',
@@ -939,7 +940,7 @@ if submitted:
                 }
                 #
                 dd_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "DD",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("dd_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("dd_opponent1_name")}/{st.session_state.get("dd_opponent2_name")}',
@@ -961,7 +962,7 @@ if submitted:
                 }
                 #
                 mx1_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX1",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx1_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx1_opponent1_name")}/{st.session_state.get("mx1_opponent2_name")}',
@@ -983,7 +984,7 @@ if submitted:
                 }
                 #
                 mx2_row = {
-                    "id": MATCHS_TABLE["id"].max() + 1,
+                    "id": id_match,
                     "type_match": "MX2",
                     "aob_player_id": f'{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob1_name"))}/{utils.get_player_id(PLAYERS_TABLE, st.session_state.get("mx2_aob2_name"))}',
                     "opponent_player": f'{st.session_state.get("mx2_opponent1_name")}/{st.session_state.get("mx2_opponent2_name")}',
