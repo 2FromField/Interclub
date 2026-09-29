@@ -10,10 +10,16 @@ if not check_record_password(page_key="admin", secret_path="admin.password"):
 ##################################################################
 #                          DONNEES                               #
 ##################################################################
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+aujourdhui = datetime.now(ZoneInfo("Europe/Paris")).date()
+annee_debut = aujourdhui.year if aujourdhui.month >= 8 else aujourdhui.year - 1
+
+saison = f"{annee_debut}-{(annee_debut + 1) % 100:02d}"
 
 # --- Accès aux tables
-saison = utils.selecteur_saison() # Choix de la saison
-INTERCLUB_TABLE, MATCHS_TABLE, PLAYERS_TABLE = utils.charger_tables(saison)
+INTERCLUB_TABLE, MATCHS_TABLE, PLAYERS_TABLE = utils.charger_tables("Toutes les saisons")
 
 # --- Données brutes
 EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]
