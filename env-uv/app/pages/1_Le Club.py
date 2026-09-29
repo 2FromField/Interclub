@@ -658,7 +658,7 @@ else:
             # Rangs
             st.divider()
             
-            l2_c1, l2_c2, l2_c3 = st.columns([3, 3, 3], gap="small")
+            l2_c1, l2_c2, l2_c3 = st.columns([3, 3, 3], gap="small", wrap=False,)
             with l2_c1:
                 trend_span_s = utils.rank_progression_span(
                     TABLE_MATCHS,
