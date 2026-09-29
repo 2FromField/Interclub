@@ -812,27 +812,31 @@ else:
 
                 /* Bouton Streamlit à gauche */
                 div.stButton {
+                    margin-top: 10px !important;
                     position: absolute !important;
                     left: 0 !important;
                     top: 0 !important;
-                    width: 5% !important;
+                    width: 38px !important;
                     min-width: 38px !important;
-                    height: 63px !important;
+                    height: 38px !important;
                     z-index: 2 !important;
                 }
 
                 div.stButton > button {
-                    width: 100% !important;
-                    height: 63px !important;
-                    min-height: 63px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 38px !important;
+                    height: 38px !important;
+                    min-height: 38px !important;
                     padding: 0 !important;
-                    border-radius: 14px !important;
-                    background: #111827 !important;
-                    border: 1px solid #111827 !important;
-                    color: white !important;
-                    font-size: 18px !important;
+                    border-radius: 50% !important;
+                    background: rgba(125, 211, 252, 0.75) !important;
+                    border: 1px solid rgba(14, 165, 233, 0.65) !important;
+                    color: #0c4a6e !important;
+                    font-size: 17px !important;
                     font-weight: 700 !important;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
                     transition: all 0.15s ease !important;
                 }
 
@@ -856,7 +860,7 @@ else:
                 """
             ):
                 if st.button(
-                    "",
+                    "i",
                     key=f"open_player_{player_id}",
                     use_container_width=True
                 ):
@@ -995,7 +999,7 @@ else:
                     box-sizing: border-box;
                     padding: 18px;
                     border-radius: 20px;
-                    background: rgba(204, 205, 211);
+                    background: rgba(30, 30, 30);
                     border: 1px solid #e5e7eb;
                     font-family: Arial, sans-serif;
                     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -1013,7 +1017,7 @@ else:
                         <div style="
                             font-size: 18px;
                             font-weight: 800;
-                            color: #111827;
+                            color: #fffff;
                             line-height: 1.2;
                         ">
                             {team_name} ({team})
@@ -1212,7 +1216,7 @@ else:
                     utils.kpi_card("Série", f"{utils.current_streak(matchs_list)[1]} {kpi_icon}", kpi_text)
 
         with c1:
-            team_card(1,"PR",f"{ASSETS_TEAM_DIR}/PR_logo.png","Bad'A'Boum","REBEYROL Jeanne",team_list("PR"))
+            team_card(1,"PR",f"{ASSETS_TEAM_DIR}/PR_logo.png","Bad'A'Boum","BRUNO Joey",team_list("PR"))
             #
             team_card(2,"D5",f"{ASSETS_TEAM_DIR}/D5_logo.png","AOB35-5","BARON Jerome",team_list("D5"))
         with c2:
