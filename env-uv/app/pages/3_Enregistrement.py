@@ -1032,6 +1032,7 @@ if submitted:
                 .fillna("")
                 .str.count("opponent")
                 .sum(),
+                "saison": str(saison),
             }
             #
             # Ouvrir la fenêtre de vérification
