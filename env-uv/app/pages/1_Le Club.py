@@ -617,7 +617,7 @@ else:
         joueurs = players["name"].unique().tolist()
 
         @st.dialog("Fiche joueur")
-        def show_player_modal(player_id):
+        def show_player_modal(player_id:int, ranks:list):
             """Affichage de la popup d'un joueur suite au clic sur le bouton à côté
             de la carte d'un joueur spécifique.
             
@@ -654,6 +654,102 @@ else:
                 st.markdown(html, unsafe_allow_html=True)
                 st.subheader(player["name"])
                 st.metric(f"{player['division']} - {player['age']} ans ({'♂' if player['gender'] == 'H' else '♀'})", "")
+            
+            # Rangs
+            st.divider()
+            
+            l2_c1, l2_c2, l2_c3 = st.columns([3, 3, 3], gap="small")
+            with l2_c1:
+                trend_span_s = utils.rank_progression_span(
+                    TABLE_MATCHS,
+                    player_id,
+                    "simple",
+                )
+
+                simple_div = f"""
+                <span style="position: relative; display: inline-flex;">
+                    <span style="
+                        padding: 7px 15px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[0])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                    ">
+                        {ranks[0]}
+                    </span>
+                    {trend_span_s}
+                </span>
+                """
+
+                st.html(
+                    f'<div style="width:100%;display:flex;justify-content:center;">'
+                    f'{simple_div}'
+                    f'</div>'
+                )
+            with l2_c2:
+                trend_span_d = utils.rank_progression_span(
+                    TABLE_MATCHS,
+                    player_id,
+                    "double",
+                )
+
+                double_div = f"""
+                <span style="position: relative; display: inline-flex;">
+                    <span style="
+                        padding: 7px 15px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[1])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                    ">
+                        {ranks[1]}
+                    </span>
+                    {trend_span_d}
+                </span>
+                """
+
+                st.html(
+                    f'<div style="width:100%;display:flex;justify-content:center;">'
+                    f'{double_div}'
+                    f'</div>'
+                )
+            with l2_c3:
+                trend_span_m = utils.rank_progression_span(
+                    TABLE_MATCHS,
+                    player_id,
+                    "mixte",
+                )
+
+                mixte_div = f"""
+                <span style="position: relative; display: inline-flex;">
+                    <span style="
+                        padding: 7px 15px;
+                        border-radius: 9px;
+                        background: {utils.rank_stylizing(ranks[2])};
+                        color: #FFFFFF;
+                        font-size: 11px;
+                        font-weight: 700;
+                        min-width: 28px;
+                        text-align: center;
+                    ">
+                        {ranks[2]}
+                    </span>
+                    {trend_span_m}
+                </span>
+                """
+
+                st.html(
+                    f'<div style="width:100%;display:flex;justify-content:center;">'
+                    f'{mixte_div}'
+                    f'</div>'
+                )
+            
             
             # Classements
             st.divider()
@@ -864,7 +960,7 @@ else:
                     key=f"open_player_{player_id}",
                     use_container_width=True
                 ):
-                    show_player_modal(player_id)
+                    show_player_modal(player_id, ranks)
 
                 html_card = f"""
                 <div style="
@@ -901,7 +997,7 @@ else:
                             {joueur}
                         </div>
                     </div>
-
+                    
                     <div style="
                         display: flex;
                         gap: 5px;

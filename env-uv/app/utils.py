@@ -1281,3 +1281,109 @@ def current_streak(results: list):
         return "win", streak
     else:
         return "loss", streak
+
+def rank_progression_span(table_match: pd.DataFrame, player_id, discipline: str) -> str:
+    """Retourne une pastille indiquant l'évolution récente du classement du joueur.
+
+    `discipline` accepte : "simple", "double" ou "mixte".
+    Les matchs sont triés par id décroissant : l'id le plus élevé est le plus récent.
+    """
+    prefixes = {
+        "simple": ("SH", "SD"),
+        "double": ("DH", "DD"),
+        "mixte": ("MX",),
+    }
+
+    discipline = discipline.lower()
+    if discipline not in prefixes:
+        raise ValueError(
+            f"Discipline inconnue : {discipline}. "
+            "Valeurs attendues : 'simple', 'double' ou 'mixte'."
+        )
+
+    styles = {
+        "up": ("↑", "#16A34A"),
+        "down": ("↓", "#DC2626"),
+        "stable": ("↔", "#F59E0B"),
+        "unknown": ("?", "#9CA3AF"),
+    }
+
+    def normalize_id(value) -> str:
+        if pd.isna(value):
+            return ""
+        try:
+            return str(int(float(str(value).strip())))
+        except (TypeError, ValueError):
+            return str(value).strip()
+
+    def split_values(value) -> list[str]:
+        if pd.isna(value):
+            return []
+        return [part.strip() for part in str(value).split("/")]
+
+    player_id = normalize_id(player_id)
+    rank_order = {rank: index for index, rank in enumerate(CLASSEMENTS)}
+
+    required_columns = {"id", "type_match", "aob_player_id", "aob_rank"}
+    if not required_columns.issubset(table_match.columns) or not player_id:
+        symbol, color = styles["unknown"]
+    else:
+        matches = table_match.copy()
+        matches["_match_id"] = pd.to_numeric(matches["id"], errors="coerce")
+        matches = matches.dropna(subset=["_match_id"]).sort_values(
+            "_match_id", ascending=False
+        )
+
+        recent_ranks = []
+        played_matches = 0
+
+        for _, match in matches.iterrows():
+            match_type = str(match["type_match"]).upper()
+            if not match_type.startswith(prefixes[discipline]):
+                continue
+
+            player_ids = [
+                normalize_id(value)
+                for value in split_values(match["aob_player_id"])
+            ]
+
+            if player_id not in player_ids:
+                continue
+
+            played_matches += 1
+
+            player_index = player_ids.index(player_id)
+            ranks = split_values(match["aob_rank"])
+
+            if player_index >= len(ranks):
+                continue
+
+            rank = ranks[player_index].upper()
+            if rank in rank_order:
+                recent_ranks.append(rank)
+
+            if len(recent_ranks) == 2:
+                break
+
+        if played_matches == 0:
+            symbol, color = styles["unknown"]
+        elif len(recent_ranks) < 2:
+            symbol, color = styles["stable"]
+        else:
+            current_rank, previous_rank = recent_ranks
+            current_order = rank_order[current_rank]
+            previous_order = rank_order[previous_rank]
+
+            if current_order < previous_order:
+                symbol, color = styles["up"]
+            elif current_order > previous_order:
+                symbol, color = styles["down"]
+            else:
+                symbol, color = styles["stable"]
+
+    return (
+        f'<span style="display:inline-flex;align-items:center;'
+        f'justify-content:center;width:16px;height:16px;border-radius:50%;'
+        f'background:{color};color:white;font-size:12px;font-weight:700;'
+        f'line-height:16px;text-align:center;margin-top:8px;margin-left:-7px">{symbol}</span>'
+    )
