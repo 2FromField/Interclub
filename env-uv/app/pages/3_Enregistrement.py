@@ -12,9 +12,8 @@ if not check_record_password(page_key="admin", secret_path="admin.password"):
 ##################################################################
 
 # --- Accès aux tables
-INTERCLUB_TABLE = utils.TABLE_INTERCLUB
-MATCHS_TABLE = utils.TABLE_MATCHS
-PLAYERS_TABLE = utils.TABLE_PLAYERS
+saison = utils.selecteur_saison() # Choix de la saison
+INTERCLUB_TABLE, MATCHS_TABLE, PLAYERS_TABLE = utils.charger_tables(saison)
 
 # --- Données brutes
 EQUIPE = ["H2", "V3", "PR", "D2", "D3", "D5"]
@@ -364,6 +363,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh1_aob_set2")}/{st.session_state.get("sh1_opponent_set2")}',
                         set3=f'{st.session_state.get("sh1_aob_set3")}/{st.session_state.get("sh1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh2_row = {
@@ -389,6 +389,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh2_aob_set2")}/{st.session_state.get("sh2_opponent_set2")}',
                         set3=f'{st.session_state.get("sh2_aob_set3")}/{st.session_state.get("sh2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh3_row = {
@@ -414,6 +415,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh3_aob_set2")}/{st.session_state.get("sh3_opponent_set2")}',
                         set3=f'{st.session_state.get("sh3_aob_set3")}/{st.session_state.get("sh3_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh4_row = {
@@ -439,6 +441,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh4_aob_set2")}/{st.session_state.get("sh4_opponent_set2")}',
                         set3=f'{st.session_state.get("sh4_aob_set3")}/{st.session_state.get("sh4_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dh1_row = {
@@ -460,6 +463,7 @@ if submitted:
                         set2=f'{st.session_state.get("dh1_aob_set2")}/{st.session_state.get("dh1_opponent_set2")}',
                         set3=f'{st.session_state.get("dh1_aob_set3")}/{st.session_state.get("dh1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dh2_row = {
@@ -481,10 +485,11 @@ if submitted:
                         set2=f'{st.session_state.get("dh2_aob_set2")}/{st.session_state.get("dh2_opponent_set2")}',
                         set3=f'{st.session_state.get("dh2_aob_set3")}/{st.session_state.get("dh2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 match_df = utils.create_df_from_dict(
-                    [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row]
+                    [sh1_row, sh2_row, sh3_row, sh4_row, dh1_row, dh2_row], MATCHS_TABLE
                 )
             #
             elif categorie == "D5":
@@ -511,6 +516,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh1_aob_set2")}/{st.session_state.get("sh1_opponent_set2")}',
                         set3=f'{st.session_state.get("sh1_aob_set3")}/{st.session_state.get("sh1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh2_row = {
@@ -536,6 +542,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh2_aob_set2")}/{st.session_state.get("sh2_opponent_set2")}',
                         set3=f'{st.session_state.get("sh2_aob_set3")}/{st.session_state.get("sh2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sd1_row = {
@@ -561,6 +568,7 @@ if submitted:
                         set2=f'{st.session_state.get("sd1_aob_set2")}/{st.session_state.get("sd1_opponent_set2")}',
                         set3=f'{st.session_state.get("sd1_aob_set3")}/{st.session_state.get("sd1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dh_row = {
@@ -582,6 +590,7 @@ if submitted:
                         set2=f'{st.session_state.get("dh_aob_set2")}/{st.session_state.get("dh_opponent_set2")}',
                         set3=f'{st.session_state.get("dh_aob_set3")}/{st.session_state.get("dh_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dd_row = {
@@ -603,6 +612,7 @@ if submitted:
                         set2=f'{st.session_state.get("dd_aob_set2")}/{st.session_state.get("dd_opponent_set2")}',
                         set3=f'{st.session_state.get("dd_aob_set3")}/{st.session_state.get("dd_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx1_row = {
@@ -624,6 +634,7 @@ if submitted:
                         set2=f'{st.session_state.get("mx1_aob_set2")}/{st.session_state.get("mx1_opponent_set2")}',
                         set3=f'{st.session_state.get("mx1_aob_set3")}/{st.session_state.get("mx1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx2_row = {
@@ -645,10 +656,11 @@ if submitted:
                         set2=f'{st.session_state.get("mx2_aob_set2")}/{st.session_state.get("mx2_opponent_set2")}',
                         set3=f'{st.session_state.get("mx2_aob_set3")}/{st.session_state.get("mx2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 match_df = utils.create_df_from_dict(
-                    [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row]
+                    [sh1_row, sh2_row, sd1_row, dh_row, dd_row, mx1_row, mx2_row], MATCHS_TABLE
                 )
             #
             elif categorie == "V3":
@@ -675,6 +687,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh1_aob_set2")}/{st.session_state.get("sh1_opponent_set2")}',
                         set3=f'{st.session_state.get("sh1_aob_set3")}/{st.session_state.get("sh1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh2_row = {
@@ -700,6 +713,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh2_aob_set2")}/{st.session_state.get("sh2_opponent_set2")}',
                         set3=f'{st.session_state.get("sh2_aob_set3")}/{st.session_state.get("sh2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dh_row = {
@@ -721,6 +735,7 @@ if submitted:
                         set2=f'{st.session_state.get("dh_aob_set2")}/{st.session_state.get("dh_opponent_set2")}',
                         set3=f'{st.session_state.get("dh_aob_set3")}/{st.session_state.get("dh_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dd_row = {
@@ -742,6 +757,7 @@ if submitted:
                         set2=f'{st.session_state.get("dd_aob_set2")}/{st.session_state.get("dd_opponent_set2")}',
                         set3=f'{st.session_state.get("dd_aob_set3")}/{st.session_state.get("dd_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx1_row = {
@@ -763,6 +779,7 @@ if submitted:
                         set2=f'{st.session_state.get("mx1_aob_set2")}/{st.session_state.get("mx1_opponent_set2")}',
                         set3=f'{st.session_state.get("mx1_aob_set3")}/{st.session_state.get("mx1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx2_row = {
@@ -784,10 +801,11 @@ if submitted:
                         set2=f'{st.session_state.get("mx2_aob_set2")}/{st.session_state.get("mx2_opponent_set2")}',
                         set3=f'{st.session_state.get("mx2_aob_set3")}/{st.session_state.get("mx2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 match_df = utils.create_df_from_dict(
-                    [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row]
+                    [sh1_row, sh2_row, dh_row, dd_row, mx1_row, mx2_row], MATCHS_TABLE
                 )
             #
             else:
@@ -814,6 +832,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh1_aob_set2")}/{st.session_state.get("sh1_opponent_set2")}',
                         set3=f'{st.session_state.get("sh1_aob_set3")}/{st.session_state.get("sh1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sh2_row = {
@@ -839,6 +858,7 @@ if submitted:
                         set2=f'{st.session_state.get("sh2_aob_set2")}/{st.session_state.get("sh2_opponent_set2")}',
                         set3=f'{st.session_state.get("sh2_aob_set3")}/{st.session_state.get("sh2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sd1_row = {
@@ -864,6 +884,7 @@ if submitted:
                         set2=f'{st.session_state.get("sd1_aob_set2")}/{st.session_state.get("sd1_opponent_set2")}',
                         set3=f'{st.session_state.get("sd1_aob_set3")}/{st.session_state.get("sd1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 sd2_row = {
@@ -889,6 +910,7 @@ if submitted:
                         set2=f'{st.session_state.get("sd2_aob_set2")}/{st.session_state.get("sd2_opponent_set2")}',
                         set3=f'{st.session_state.get("sd2_aob_set3")}/{st.session_state.get("sd2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dh_row = {
@@ -910,6 +932,7 @@ if submitted:
                         set2=f'{st.session_state.get("dh_aob_set2")}/{st.session_state.get("dh_opponent_set2")}',
                         set3=f'{st.session_state.get("dh_aob_set3")}/{st.session_state.get("dh_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 dd_row = {
@@ -931,6 +954,7 @@ if submitted:
                         set2=f'{st.session_state.get("dd_aob_set2")}/{st.session_state.get("dd_opponent_set2")}',
                         set3=f'{st.session_state.get("dd_aob_set3")}/{st.session_state.get("dd_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx1_row = {
@@ -952,6 +976,7 @@ if submitted:
                         set2=f'{st.session_state.get("mx1_aob_set2")}/{st.session_state.get("mx1_opponent_set2")}',
                         set3=f'{st.session_state.get("mx1_aob_set3")}/{st.session_state.get("mx1_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 mx2_row = {
@@ -973,6 +998,7 @@ if submitted:
                         set2=f'{st.session_state.get("mx2_aob_set2")}/{st.session_state.get("mx2_opponent_set2")}',
                         set3=f'{st.session_state.get("mx2_aob_set3")}/{st.session_state.get("mx2_opponent_set3")}',
                     ),
+                    "saison": str(saison),
                 }
                 #
                 match_df = utils.create_df_from_dict(
@@ -985,7 +1011,7 @@ if submitted:
                         dd_row,
                         mx1_row,
                         mx2_row,
-                    ]
+                    ], MATCHS_TABLE
                 )
                 #
             

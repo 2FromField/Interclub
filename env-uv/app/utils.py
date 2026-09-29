@@ -183,11 +183,16 @@ CLASSEMENTS = [
 
 
 # Créer un dataframe à partir des dictionnaires de chaque match
-def create_df_from_dict(dicts: list):
+def create_df_from_dict(dicts: list, table_match: pd.DataFrame):
     rows = dicts
 
     # --- 2) Assigner des IDs uniques (évite d’avoir le même id partout)
-    start_id = (int(TABLE_MATCHS["id"].max()) if not TABLE_MATCHS.empty else 0) + 1
+    start_id = (
+        int(table_match["id"].max())
+        if not table_match.empty
+        else 0
+    ) + 1
+    
     for i, r in enumerate(rows):
         r["id"] = start_id + i
 
