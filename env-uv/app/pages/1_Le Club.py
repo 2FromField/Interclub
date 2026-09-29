@@ -658,97 +658,45 @@ else:
             # Rangs
             st.divider()
             
-            l2_c1, l2_c2, l2_c3 = st.columns([3, 3, 3], gap="small", wrap=False,)
-            with l2_c1:
-                trend_span_s = utils.rank_progression_span(
-                    TABLE_MATCHS,
-                    player_id,
-                    "simple",
-                )
+            trend_spans = [
+                utils.rank_progression_span(TABLE_MATCHS, player_id, "simple"),
+                utils.rank_progression_span(TABLE_MATCHS, player_id, "double"),
+                utils.rank_progression_span(TABLE_MATCHS, player_id, "mixte"),
+            ]
 
-                simple_div = f"""
-                <span style="position: relative; display: inline-flex;">
-                    <span style="
-                        padding: 7px 15px;
-                        border-radius: 9px;
-                        background: {utils.rank_stylizing(ranks[0])};
-                        color: #FFFFFF;
-                        font-size: 11px;
-                        font-weight: 700;
-                        min-width: 28px;
-                        text-align: center;
-                    ">
-                        {ranks[0]}
+            badges_html = ""
+
+            for rank, trend in zip(ranks[:3], trend_spans):
+                badges_html += f"""
+                <div style="flex:1 1 0; min-width:0; display:flex; justify-content:center;">
+                    <span style="display:inline-flex; align-items:center;">
+                        <span style="
+                            padding:7px 15px;
+                            border-radius:9px;
+                            background:{utils.rank_stylizing(rank)};
+                            color:#FFFFFF;
+                            font-size:10px;
+                            font-weight:700;
+                            min-width:28px;
+                            text-align:center;
+                        ">{rank}</span>
+                        {trend}
                     </span>
-                    {trend_span_s}
-                </span>
+                </div>
                 """
 
-                st.html(
-                    f'<div style="width:100%;display:flex;justify-content:center;">'
-                    f'{simple_div}'
-                    f'</div>'
-                )
-            with l2_c2:
-                trend_span_d = utils.rank_progression_span(
-                    TABLE_MATCHS,
-                    player_id,
-                    "double",
-                )
-
-                double_div = f"""
-                <span style="position: relative; display: inline-flex;">
-                    <span style="
-                        padding: 7px 15px;
-                        border-radius: 9px;
-                        background: {utils.rank_stylizing(ranks[1])};
-                        color: #FFFFFF;
-                        font-size: 11px;
-                        font-weight: 700;
-                        min-width: 28px;
-                        text-align: center;
-                    ">
-                        {ranks[1]}
-                    </span>
-                    {trend_span_d}
-                </span>
-                """
-
-                st.html(
-                    f'<div style="width:100%;display:flex;justify-content:center;">'
-                    f'{double_div}'
-                    f'</div>'
-                )
-            with l2_c3:
-                trend_span_m = utils.rank_progression_span(
-                    TABLE_MATCHS,
-                    player_id,
-                    "mixte",
-                )
-
-                mixte_div = f"""
-                <span style="position: relative; display: inline-flex;">
-                    <span style="
-                        padding: 7px 15px;
-                        border-radius: 9px;
-                        background: {utils.rank_stylizing(ranks[2])};
-                        color: #FFFFFF;
-                        font-size: 11px;
-                        font-weight: 700;
-                        min-width: 28px;
-                        text-align: center;
-                    ">
-                        {ranks[2]}
-                    </span>
-                    {trend_span_m}
-                </span>
-                """
-
-                st.html(
-                    f'<div style="width:100%;display:flex;justify-content:center;">'
-                    f'{mixte_div}'
-                    f'</div>'
-                )
+            st.html(f"""
+            <div style="
+                width:100%;
+                display:flex;
+                flex-wrap:nowrap;
+                align-items:center;
+                justify-content:space-between;
+                gap:2px;
+            ">
+                {badges_html}
+            </div>
+            """)
             
             
             # Classements
